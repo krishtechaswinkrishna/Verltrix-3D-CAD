@@ -1,0 +1,4341 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Veltrix 3D CAD Studio</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #eef2f5;
+      --panel: #ffffff;
+      --panel-2: #f6f8fa;
+      --ink: #18212b;
+      --muted: #647280;
+      --line: #d5dee6;
+      --line-strong: #b8c6d1;
+      --red: #d71920;
+      --red-soft: #ffe7e8;
+      --teal: #087d83;
+      --teal-soft: #dff3f4;
+      --green: #2f7d46;
+      --amber: #b66b00;
+      --blue: #285f9f;
+      --shadow: 0 14px 32px rgba(24, 33, 43, 0.08);
+      --radius: 8px;
+      --top-h: 106px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      overflow: hidden;
+      background:
+        linear-gradient(90deg, rgba(8, 125, 131, 0.06) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(215, 25, 32, 0.045) 1px, transparent 1px),
+        var(--bg);
+      background-size: 42px 42px;
+      color: var(--ink);
+      font-family: "Segoe UI", Roboto, Arial, sans-serif;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    select,
+    textarea {
+      font: inherit;
+    }
+
+    button {
+      border: 0;
+      cursor: pointer;
+    }
+
+    input,
+    select,
+    textarea {
+      min-width: 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 3px rgba(8, 125, 131, 0.13);
+    }
+
+    .app {
+      display: grid;
+      grid-template-rows: var(--top-h) 1fr 28px;
+      width: 100vw;
+      height: 100vh;
+    }
+
+    .top {
+      position: relative;
+      z-index: 5;
+      display: grid;
+      grid-template-rows: 44px 62px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 8px 22px rgba(24, 33, 43, 0.06);
+      backdrop-filter: blur(14px);
+    }
+
+    .menu-row {
+      display: grid;
+      grid-template-columns: 236px 1fr auto;
+      gap: 14px;
+      align-items: center;
+      min-width: 0;
+      padding: 7px 14px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      border-radius: 7px;
+      background: var(--red);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(215, 25, 32, 0.2);
+    }
+
+    .brand-title {
+      min-width: 0;
+      font-size: 15px;
+      font-weight: 800;
+      line-height: 1.1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .menu-buttons,
+    .quick-buttons,
+    .command-tabs,
+    .command-strip {
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    .menu-buttons {
+      gap: 4px;
+    }
+
+    .menu-button {
+      min-height: 28px;
+      padding: 5px 9px;
+      border-radius: 6px;
+      background: transparent;
+      color: #344150;
+      font-size: 12px;
+    }
+
+    .menu-button:hover {
+      background: var(--panel-2);
+    }
+
+    .quick-buttons {
+      gap: 6px;
+      justify-content: end;
+    }
+
+    .tool-btn,
+    .tab-btn,
+    .icon-btn {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      color: #283440;
+      transition: background 140ms ease, border-color 140ms ease, transform 140ms ease;
+    }
+
+    .tool-btn:hover,
+    .tab-btn:hover,
+    .icon-btn:hover {
+      transform: translateY(-1px);
+      border-color: var(--line-strong);
+      background: #f9fbfc;
+    }
+
+    .icon-btn {
+      width: 34px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      padding: 0;
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .ribbon-row {
+      display: grid;
+      grid-template-columns: 236px 1fr;
+      gap: 14px;
+      align-items: stretch;
+      min-width: 0;
+      padding: 8px 14px;
+    }
+
+    .command-tabs {
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tab-btn {
+      flex: 0 0 auto;
+      min-height: 42px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .tab-btn.active {
+      border-color: var(--red);
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .command-strip {
+      gap: 7px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+
+    .tool-btn {
+      flex: 0 0 auto;
+      min-width: 58px;
+      min-height: 42px;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 2px;
+      padding: 6px 9px;
+      font-size: 11px;
+      line-height: 1.1;
+    }
+
+    .tool-btn.active {
+      border-color: var(--teal);
+      background: var(--teal-soft);
+      color: #075e63;
+      font-weight: 800;
+    }
+
+    .tool-icon {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 5px;
+      background: #eef2f5;
+      color: #354554;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .main {
+      display: grid;
+      grid-template-columns: 270px minmax(0, 1fr) 308px;
+      gap: 10px;
+      min-height: 0;
+      padding: 10px;
+    }
+
+    .panel,
+    .viewport-shell {
+      min-height: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel {
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-height: 42px;
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .panel-title {
+      min-width: 0;
+      font-size: 12px;
+      font-weight: 800;
+      color: #394757;
+      text-transform: uppercase;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .pane-tabs {
+      display: flex;
+      gap: 5px;
+    }
+
+    .pane-tab {
+      min-width: 34px;
+      min-height: 26px;
+      padding: 4px 6px;
+      border-radius: 5px;
+      background: #edf2f5;
+      color: #41515f;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .pane-tab.active {
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .tree-body,
+    .props-body {
+      min-height: 0;
+      overflow: auto;
+      padding: 10px;
+    }
+
+    .tree-group + .tree-group {
+      margin-top: 12px;
+    }
+
+    .tree-group-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .tree-item {
+      display: grid;
+      grid-template-columns: 18px 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 30px;
+      padding: 5px 6px;
+      border-radius: 6px;
+      color: #2e3a45;
+      font-size: 12px;
+    }
+
+    .tree-item:hover,
+    .tree-item.selected {
+      background: #f0f5f7;
+    }
+
+    .tree-dot {
+      width: 13px;
+      height: 13px;
+      border: 1px solid #aebfca;
+      border-radius: 4px;
+      background: #dbe5eb;
+    }
+
+    .tree-dot.red {
+      border-color: #ef9fa2;
+      background: var(--red-soft);
+    }
+
+    .tree-dot.teal {
+      border-color: #8bcdd0;
+      background: var(--teal-soft);
+    }
+
+    .tree-dot.green {
+      border-color: #8fbf9d;
+      background: #e1f2e5;
+    }
+
+    .tree-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .tree-count {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .viewport-shell {
+      display: grid;
+      grid-template-rows: 42px minmax(0, 1fr) 30px;
+    }
+
+    .viewport-top {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 10px;
+      align-items: center;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .view-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--red);
+    }
+
+    .dot:nth-child(2) {
+      background: var(--amber);
+    }
+
+    .dot:nth-child(3) {
+      background: var(--green);
+    }
+
+    .view-title {
+      min-width: 0;
+      color: #425466;
+      font-size: 12px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .heads-up {
+      display: flex;
+      gap: 6px;
+    }
+
+    .hud {
+      min-width: 32px;
+      height: 25px;
+      display: grid;
+      place-items: center;
+      border-radius: 5px;
+      background: #edf2f5;
+      color: #2e3d4c;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .canvas-wrap {
+      position: relative;
+      min-height: 0;
+      background: #fff;
+    }
+
+    .three-viewport {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      display: none;
+      overflow: hidden;
+      background: #f8fbfd;
+    }
+
+    .three-viewport canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    .canvas-wrap.three-active .three-viewport {
+      display: block;
+    }
+
+    #cadCanvas {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      width: 100%;
+      height: 100%;
+      display: block;
+      background: transparent;
+    }
+
+    .view-overlay {
+      position: absolute;
+      left: 14px;
+      top: 14px;
+      z-index: 2;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      max-width: calc(100% - 28px);
+      pointer-events: none;
+    }
+
+    .badge {
+      min-height: 26px;
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 8px;
+      border: 1px solid rgba(53, 69, 84, 0.16);
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.88);
+      color: #30404f;
+      font-size: 11px;
+      font-weight: 700;
+      box-shadow: 0 6px 18px rgba(24, 33, 43, 0.08);
+    }
+
+    .viewport-status {
+      display: grid;
+      grid-template-columns: 1fr auto auto auto;
+      gap: 12px;
+      align-items: center;
+      padding: 6px 10px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+      color: #526272;
+      font-size: 12px;
+    }
+
+    .props-body {
+      display: grid;
+      align-content: start;
+      gap: 12px;
+    }
+
+    .property-section {
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .property-section h3 {
+      margin: 0;
+      padding: 8px 10px;
+      border-bottom: 1px solid var(--line);
+      background: #f7fafb;
+      color: #354554;
+      font-size: 12px;
+      text-transform: uppercase;
+    }
+
+    .property-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px;
+      padding: 8px;
+    }
+
+    .field {
+      display: grid;
+      gap: 3px;
+      min-width: 0;
+    }
+
+    .field.full {
+      grid-column: 1 / -1;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      height: 28px;
+      padding: 5px 7px;
+      font-size: 12px;
+    }
+
+    .action-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      padding: 10px;
+    }
+
+    .action-btn {
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: #30404f;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .action-btn.primary {
+      border-color: var(--red);
+      background: var(--red);
+      color: #fff;
+    }
+
+    .action-btn:hover {
+      background: #f7fafb;
+    }
+
+    .action-btn.primary:hover {
+      background: #bd141a;
+    }
+
+    .list-box {
+      display: grid;
+      gap: 6px;
+      padding: 10px;
+      max-height: 190px;
+      overflow: auto;
+    }
+
+    .mini-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+      align-items: center;
+      min-height: 28px;
+      padding: 6px 7px;
+      border-radius: 6px;
+      background: #f8fafb;
+      color: #394858;
+      font-size: 12px;
+    }
+
+    .mini-row strong {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .pill {
+      padding: 3px 6px;
+      border-radius: 999px;
+      background: #e9eef2;
+      color: #526272;
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 14px;
+      align-items: center;
+      padding: 5px 12px;
+      border-top: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.96);
+      color: #536374;
+      font-size: 12px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 16px;
+      bottom: 42px;
+      z-index: 10;
+      min-width: 220px;
+      max-width: min(420px, calc(100vw - 32px));
+      padding: 10px 12px;
+      border: 1px solid var(--line-strong);
+      border-left: 4px solid var(--teal);
+      border-radius: 7px;
+      background: #fff;
+      color: #263542;
+      box-shadow: 0 16px 42px rgba(24, 33, 43, 0.16);
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(8px);
+      pointer-events: none;
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    @media (max-width: 1180px) {
+      :root {
+        --top-h: 148px;
+      }
+
+      body {
+        overflow: auto;
+      }
+
+      .app {
+        min-height: 100vh;
+        height: auto;
+      }
+
+      .top {
+        grid-template-rows: auto auto;
+        position: sticky;
+        top: 0;
+      }
+
+      .menu-row,
+      .ribbon-row {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-buttons {
+        justify-content: start;
+        overflow-x: auto;
+      }
+
+      .main {
+        grid-template-columns: 1fr;
+      }
+
+      .panel,
+      .viewport-shell {
+        min-height: 420px;
+      }
+
+      .tree-body,
+      .props-body {
+        max-height: 360px;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .main {
+        padding: 8px;
+      }
+
+      .viewport-shell {
+        min-height: 520px;
+      }
+
+      .viewport-status {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .property-grid,
+      .action-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      body {
+        overflow: visible;
+        background: #fff;
+      }
+
+      .app {
+        display: block;
+        height: auto;
+      }
+
+      .top,
+      .left-panel,
+      .right-panel,
+      .bottom,
+      .toast {
+        display: none;
+      }
+
+      .main {
+        display: block;
+        padding: 0;
+      }
+
+      .viewport-shell {
+        height: 95vh;
+        box-shadow: none;
+      }
+    }
+
+    /* ── Extrude PropertyManager Modal ── */
+    .extrude-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(24,33,43,0.28);
+      backdrop-filter: blur(2px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 160ms ease;
+    }
+    .extrude-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    .extrude-dialog {
+      width: 330px;
+      border-radius: 10px;
+      background: #fff;
+      box-shadow: 0 24px 56px rgba(24,33,43,0.18);
+      border: 1px solid var(--line);
+      overflow: hidden;
+      transform: translateY(12px) scale(0.98);
+      transition: transform 180ms ease;
+    }
+    .extrude-overlay.open .extrude-dialog {
+      transform: translateY(0) scale(1);
+    }
+    .extrude-dialog-head {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 13px 16px 11px;
+      border-bottom: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+    .extrude-dialog-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      background: var(--red);
+      color: #fff;
+      display: grid;
+      place-items: center;
+      font-size: 13px;
+      font-weight: 900;
+      flex-shrink: 0;
+      box-shadow: 0 6px 14px rgba(215,25,32,0.22);
+    }
+    .extrude-dialog-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--ink);
+      line-height: 1.1;
+    }
+    .extrude-dialog-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 1px;
+    }
+    .extrude-dialog-body {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .extrude-field-row {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      align-items: center;
+      gap: 10px;
+    }
+    .extrude-field-row label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .extrude-field-row input[type="number"],
+    .extrude-field-row select {
+      width: 100%;
+      height: 32px;
+      padding: 0 10px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      outline: none;
+    }
+    .extrude-field-row input[type="number"]:focus,
+    .extrude-field-row select:focus {
+      border-color: var(--red);
+      box-shadow: 0 0 0 3px rgba(215,25,32,0.10);
+    }
+    .extrude-slider-row {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .extrude-slider-labels {
+      display: flex;
+      justify-content: space-between;
+      font-size: 10px;
+      color: var(--muted);
+    }
+    .extrude-slider-row input[type="range"] {
+      width: 100%;
+      height: 4px;
+      accent-color: var(--red);
+      cursor: pointer;
+    }
+    .extrude-preview-badge {
+      background: var(--red-soft);
+      border: 1px solid rgba(215,25,32,0.18);
+      border-radius: 6px;
+      padding: 7px 12px;
+      font-size: 12px;
+      color: var(--red);
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 0.01em;
+    }
+    .extrude-separator {
+      height: 1px;
+      background: var(--line);
+      margin: 0 -16px;
+    }
+    .extrude-direction-row {
+      display: flex;
+      gap: 6px;
+    }
+    .extrude-dir-btn {
+      flex: 1;
+      height: 34px;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--ink);
+      font-size: 11px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 120ms;
+    }
+    .extrude-dir-btn.active {
+      border-color: var(--red);
+      background: var(--red-soft);
+      color: var(--red);
+    }
+    .extrude-dir-btn:hover:not(.active) {
+      background: var(--panel-2);
+    }
+    .extrude-dialog-footer {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px 14px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+    .extrude-footer-btn {
+      flex: 1;
+      height: 36px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--line-strong);
+      background: #fff;
+      color: var(--ink);
+      transition: all 120ms;
+    }
+    .extrude-footer-btn:hover {
+      background: var(--panel-2);
+    }
+    .extrude-footer-btn.confirm {
+      background: var(--red);
+      border-color: var(--red);
+      color: #fff;
+      box-shadow: 0 4px 12px rgba(215,25,32,0.22);
+    }
+    .extrude-footer-btn.confirm:hover {
+      background: #b8141a;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="top">
+      <div class="menu-row">
+        <div class="brand">
+          <div class="brand-mark">V3D</div>
+          <div class="brand-title" id="projectName">Part Studio 1</div>
+        </div>
+        <nav class="menu-buttons" aria-label="Menu">
+          <button class="menu-button" data-menu="file">File</button>
+          <button class="menu-button" data-menu="edit">Edit</button>
+          <button class="menu-button" data-menu="view">View</button>
+          <button class="menu-button" data-menu="insert">Insert</button>
+          <button class="menu-button" data-menu="tools">Tools</button>
+          <button class="menu-button" data-menu="window">Window</button>
+          <button class="menu-button" data-menu="help">Help</button>
+        </nav>
+        <div class="quick-buttons" aria-label="Quick access toolbar">
+          <button class="icon-btn" title="New" data-action="new">N</button>
+          <button class="icon-btn" title="Open project file" data-action="open">O</button>
+          <button class="icon-btn" title="Save to browser" data-action="save">S</button>
+          <button class="icon-btn" title="Download project JSON" data-action="download">J</button>
+          <button class="icon-btn" title="Export SVG" data-action="svg">V</button>
+          <button class="icon-btn" title="Undo" data-action="undo">U</button>
+          <button class="icon-btn" title="Redo" data-action="redo">R</button>
+          <button class="icon-btn" title="Rebuild" data-action="rebuild">B</button>
+          <button class="icon-btn" title="Print drawing" data-action="print">P</button>
+        </div>
+      </div>
+      <div class="ribbon-row">
+        <div class="command-tabs" id="commandTabs" aria-label="Veltrix command tabs"></div>
+        <div class="command-strip" id="commandStrip" aria-label="Commands"></div>
+      </div>
+    </header>
+
+    <div class="main">
+      <aside class="panel left-panel">
+        <div class="panel-head">
+          <div class="panel-title">Model Tree</div>
+          <div class="pane-tabs">
+            <button class="pane-tab active">Tree</button>
+            <button class="pane-tab">Config</button>
+            <button class="pane-tab">DimX</button>
+          </div>
+        </div>
+        <div class="tree-body" id="treeBody"></div>
+      </aside>
+
+      <section class="viewport-shell" aria-label="Graphics area">
+        <div class="viewport-top">
+          <div class="view-dots" aria-hidden="true">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+          <div class="view-title" id="viewTitle">Sketch Plane - Front</div>
+          <div class="heads-up" aria-label="Heads-up view toolbar">
+            <button class="hud" title="Zoom to fit" data-action="zoomFit">ZF</button>
+            <button class="hud" title="Zoom in" data-action="zoomIn">+</button>
+            <button class="hud" title="Zoom out" data-action="zoomOut">-</button>
+            <button class="hud" title="Front view" data-view="front">F</button>
+            <button class="hud" title="Top view" data-view="top">T</button>
+            <button class="hud" title="Isometric view" data-view="iso">ISO</button>
+            <button class="hud" title="Toggle grid" data-action="grid">G</button>
+            <button class="hud" title="Render mode" data-action="renderMode">EDG</button>
+            <button class="hud" title="Section view" data-action="section3d">SEC</button>
+          </div>
+        </div>
+        <div class="canvas-wrap" id="canvasWrap">
+          <div class="three-viewport" id="threeViewport"></div>
+          <canvas id="cadCanvas"></canvas>
+          <div class="view-overlay" id="viewOverlay"></div>
+        </div>
+        <div class="viewport-status">
+          <span id="statusMessage">Ready</span>
+          <span id="cursorReadout">X 0, Y 0</span>
+          <span id="unitReadout">MMGS</span>
+          <span id="zoomReadout">100%</span>
+        </div>
+      </section>
+
+      <aside class="panel right-panel">
+        <div class="panel-head">
+          <div class="panel-title">Inspector</div>
+          <div class="pane-tabs">
+            <button class="pane-tab active">Props</button>
+            <button class="pane-tab">Lib</button>
+            <button class="pane-tab">Mate</button>
+          </div>
+        </div>
+        <div class="props-body" id="propsBody"></div>
+      </aside>
+    </div>
+
+    <footer class="bottom">
+      <span id="bottomMessage">0 sketch entities, 0 features</span>
+      <span id="definitionState">Under-defined</span>
+      <span id="savedState">Not saved</span>
+    </footer>
+  </div>
+
+  <input type="file" id="fileInput" class="hidden" accept=".json,application/json">
+  <div class="toast" id="toast"></div>
+  <div class="extrude-overlay" id="extrudeOverlay" aria-hidden="true">
+    <div class="extrude-dialog" role="dialog" aria-modal="true" aria-labelledby="extrudeDialogTitle">
+      <div class="extrude-dialog-head">
+        <div class="extrude-dialog-icon">EX</div>
+        <div>
+          <div class="extrude-dialog-title" id="extrudeDialogTitle">Extrude Boss/Base</div>
+          <div class="extrude-dialog-subtitle">Enter the extrusion depth</div>
+        </div>
+      </div>
+      <div class="extrude-dialog-body">
+        <div class="extrude-field-row">
+          <label for="extrudeDepthInput">Depth</label>
+          <input id="extrudeDepthInput" type="number" min="1" step="1" value="40">
+        </div>
+        <div class="extrude-preview-badge" id="extrudePreviewBadge">Preview: 40 mm</div>
+      </div>
+      <div class="extrude-dialog-footer">
+        <button class="extrude-footer-btn" id="extrudeCancelBtn" type="button">Cancel</button>
+        <button class="extrude-footer-btn confirm" id="extrudeConfirmBtn" type="button">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script>
+    const canvas = document.getElementById("cadCanvas");
+    const ctx = canvas.getContext("2d");
+    const canvasWrap = document.getElementById("canvasWrap");
+    const threeViewport = document.getElementById("threeViewport");
+    const commandTabs = document.getElementById("commandTabs");
+    const commandStrip = document.getElementById("commandStrip");
+    const treeBody = document.getElementById("treeBody");
+    const propsBody = document.getElementById("propsBody");
+    const statusMessage = document.getElementById("statusMessage");
+    const bottomMessage = document.getElementById("bottomMessage");
+    const savedState = document.getElementById("savedState");
+    const cursorReadout = document.getElementById("cursorReadout");
+    const zoomReadout = document.getElementById("zoomReadout");
+    const unitReadout = document.getElementById("unitReadout");
+    const definitionState = document.getElementById("definitionState");
+    const viewTitle = document.getElementById("viewTitle");
+    const projectName = document.getElementById("projectName");
+    const fileInput = document.getElementById("fileInput");
+    const toast = document.getElementById("toast");
+    const viewOverlay = document.getElementById("viewOverlay");
+    const extrudeOverlay = document.getElementById("extrudeOverlay");
+    const extrudeDepthInput = document.getElementById("extrudeDepthInput");
+    const extrudePreviewBadge = document.getElementById("extrudePreviewBadge");
+    const extrudeCancelBtn = document.getElementById("extrudeCancelBtn");
+    const extrudeConfirmBtn = document.getElementById("extrudeConfirmBtn");
+    const STORAGE_KEY = "veltrix-3d-cad-studio";
+
+    const tabs = [
+      "Sketch",
+      "Features",
+      "Surfaces",
+      "Sheet Metal",
+      "Weldments",
+      "Mold Tools",
+      "Assembly",
+      "Drawing",
+      "Evaluate",
+      "Add-Ins",
+      "Files"
+    ];
+
+    const commands = {
+      Sketch: [
+        cmd("Select", "SEL", { tool: "select" }),
+        cmd("Line", "LN", { tool: "line" }),
+        cmd("Centerline", "CL", { tool: "centerline" }),
+        cmd("Rectangle", "RC", { tool: "rect" }),
+        cmd("Circle", "CI", { tool: "circle" }),
+        cmd("Arc", "AR", { tool: "arc" }),
+        cmd("Polygon", "PG", { tool: "polygon" }),
+        cmd("Spline", "SP", { tool: "spline" }),
+        cmd("Slot", "SL", { tool: "slot" }),
+        cmd("Point", "PT", { tool: "point" }),
+        cmd("Text", "TX", { tool: "text" }),
+        cmd("Trim", "TR", { tool: "trim" }),
+        cmd("Offset", "OF", { action: "offset" }),
+        cmd("Mirror", "MR", { action: "mirrorSketch" }),
+        cmd("Linear Pattern", "LP", { action: "linearPattern" }),
+        cmd("Circular Pattern", "CP", { action: "circularPattern" }),
+        cmd("Smart Dimension", "SD", { tool: "dimension" }),
+        cmd("Horizontal", "HZ", { action: "relationHorizontal" }),
+        cmd("Vertical", "VT", { action: "relationVertical" }),
+        cmd("Fix", "FX", { action: "relationFix" }),
+        cmd("Repair Sketch", "RS", { action: "repairSketch" })
+      ],
+      Features: [
+        cmd("Extruded Boss/Base", "EX", { action: "extrude" }),
+        cmd("Revolved Boss/Base", "RV", { action: "revolve" }),
+        cmd("Swept Boss/Base", "SP", { action: "sweep" }),
+        cmd("Lofted Boss/Base", "LF", { action: "loft" }),
+        cmd("Boundary Boss/Base", "BD", { action: "boundary" }),
+        cmd("Extruded Cut", "XC", { action: "cut" }),
+        cmd("Hole Wizard", "HW", { action: "hole" }),
+        cmd("Fillet", "FI", { action: "fillet" }),
+        cmd("Chamfer", "CH", { action: "chamfer" }),
+        cmd("Shell", "SH", { action: "shell" }),
+        cmd("Draft", "DR", { action: "draft" }),
+        cmd("Rib", "RB", { action: "rib" }),
+        cmd("Wrap", "WR", { action: "wrap" }),
+        cmd("Dome", "DM", { action: "dome" }),
+        cmd("Flex", "FL", { action: "flex" }),
+        cmd("Deform", "DF", { action: "deform" }),
+        cmd("Free Form", "FF", { action: "freeForm" }),
+        cmd("Plane", "PL", { action: "plane" }),
+        cmd("Axis", "AX", { action: "axis" }),
+        cmd("Helix", "HX", { action: "helix" }),
+        cmd("Combine", "CB", { action: "combine" }),
+        cmd("Move Face", "MF", { action: "moveFace" })
+      ],
+      Surfaces: [
+        cmd("Extruded Surface", "ES", { action: "surfaceExtrude" }),
+        cmd("Revolved Surface", "RS", { action: "surfaceRevolve" }),
+        cmd("Swept Surface", "SS", { action: "surfaceSweep" }),
+        cmd("Lofted Surface", "LS", { action: "surfaceLoft" }),
+        cmd("Boundary Surface", "BS", { action: "surfaceBoundary" }),
+        cmd("Filled Surface", "FS", { action: "surfaceFill" }),
+        cmd("Planar Surface", "PS", { action: "surfacePlanar" }),
+        cmd("Offset Surface", "OS", { action: "surfaceOffset" }),
+        cmd("Knit Surface", "KS", { action: "surfaceKnit" }),
+        cmd("Trim Surface", "TS", { action: "surfaceTrim" }),
+        cmd("Thicken", "TH", { action: "surfaceThicken" }),
+        cmd("Flatten", "FN", { action: "surfaceFlatten" })
+      ],
+      "Sheet Metal": [
+        cmd("Base Flange/Tab", "BF", { action: "baseFlange" }),
+        cmd("Edge Flange", "EF", { action: "edgeFlange" }),
+        cmd("Miter Flange", "MF", { action: "miterFlange" }),
+        cmd("Hem", "HM", { action: "hem" }),
+        cmd("Jog", "JG", { action: "jog" }),
+        cmd("Sketched Bend", "SB", { action: "sketchedBend" }),
+        cmd("Closed Corner", "CC", { action: "closedCorner" }),
+        cmd("Unfold", "UF", { action: "unfold" }),
+        cmd("Fold", "FD", { action: "fold" }),
+        cmd("Flatten", "FT", { action: "flattenSheet" }),
+        cmd("Rip", "RP", { action: "rip" }),
+        cmd("Gusset", "GS", { action: "gusset" }),
+        cmd("Vent", "VN", { action: "vent" })
+      ],
+      Weldments: [
+        cmd("Structural Member", "SM", { action: "structuralMember" }),
+        cmd("Trim/Extend", "TE", { action: "trimExtend" }),
+        cmd("End Cap", "EC", { action: "endCap" }),
+        cmd("Gusset", "GS", { action: "weldGusset" }),
+        cmd("Weld Bead", "WB", { action: "weldBead" }),
+        cmd("Cut List", "CL", { action: "cutList" }),
+        cmd("Structure System", "SS", { action: "structureSystem" })
+      ],
+      "Mold Tools": [
+        cmd("Draft Analysis", "DA", { action: "draftAnalysis" }),
+        cmd("Scale", "SC", { action: "scalePart" }),
+        cmd("Parting Line", "PL", { action: "partingLine" }),
+        cmd("Shut-Off Surfaces", "SO", { action: "shutOff" }),
+        cmd("Parting Surface", "PS", { action: "partingSurface" }),
+        cmd("Tooling Split", "TS", { action: "toolingSplit" }),
+        cmd("Core", "CR", { action: "core" }),
+        cmd("Interlock Surface", "IS", { action: "interlock" }),
+        cmd("Ejector Pins", "EP", { action: "ejectorPins" })
+      ],
+      Assembly: [
+        cmd("Insert Component", "IC", { action: "insertComponent" }),
+        cmd("Move Component", "MV", { tool: "assemblyMove" }),
+        cmd("Coincident Mate", "CM", { action: "mateCoincident" }),
+        cmd("Concentric Mate", "CN", { action: "mateConcentric" }),
+        cmd("Distance Mate", "DM", { action: "mateDistance" }),
+        cmd("Angle Mate", "AM", { action: "mateAngle" }),
+        cmd("Width Mate", "WM", { action: "mateWidth" }),
+        cmd("Gear Mate", "GM", { action: "mateGear" }),
+        cmd("Exploded View", "EV", { action: "explode" }),
+        cmd("Interference", "ID", { action: "interference" }),
+        cmd("Hole Alignment", "HA", { action: "holeAlignment" }),
+        cmd("Motion Study", "MS", { action: "motionStudy" })
+      ],
+      Drawing: [
+        cmd("Standard 3 View", "3V", { action: "standardViews" }),
+        cmd("Projected View", "PV", { action: "projectedView" }),
+        cmd("Section View", "SV", { action: "sectionView" }),
+        cmd("Detail View", "DV", { action: "detailView" }),
+        cmd("Break View", "BV", { action: "breakView" }),
+        cmd("Model Items", "MI", { action: "modelItems" }),
+        cmd("Note", "NT", { action: "note" }),
+        cmd("Balloon", "BL", { action: "balloon" }),
+        cmd("BOM", "BM", { action: "bom" }),
+        cmd("Revision Table", "RT", { action: "revisionTable" }),
+        cmd("Hole Callout", "HC", { action: "holeCallout" }),
+        cmd("MBD 3D PDF", "MB", { action: "mbd" })
+      ],
+      Evaluate: [
+        cmd("Measure", "ME", { action: "measure" }),
+        cmd("Mass Properties", "MP", { action: "massProperties" }),
+        cmd("Section Properties", "SP", { action: "sectionProperties" }),
+        cmd("Sensors", "SN", { action: "sensor" }),
+        cmd("Geometry Analysis", "GA", { action: "geometryAnalysis" }),
+        cmd("Draft Analysis", "DA", { action: "draftAnalysis" }),
+        cmd("Thickness Analysis", "TA", { action: "thicknessAnalysis" }),
+        cmd("Symmetry Check", "SY", { action: "symmetryCheck" }),
+        cmd("Compare", "CO", { action: "compareDocs" }),
+        cmd("Curvature", "CU", { action: "curvature" }),
+        cmd("Zebra Stripes", "ZS", { action: "zebra" }),
+        cmd("Sustainability", "SU", { action: "sustainability" })
+      ],
+      "Add-Ins": [
+        cmd("Simulation", "FEA", { action: "simulation" }),
+        cmd("Flow Simulation", "CFD", { action: "flow" }),
+        cmd("Motion", "MOT", { action: "motionStudy" }),
+        cmd("Routing", "RTE", { action: "routing" }),
+        cmd("Plastics", "PLA", { action: "plastics" }),
+        cmd("PDM", "PDM", { action: "pdm" }),
+        cmd("CAM", "CAM", { action: "cam" }),
+        cmd("Electrical", "ELE", { action: "electrical" }),
+        cmd("Visualize", "VIS", { action: "visualize" }),
+        cmd("Toolbox", "TB", { action: "toolbox" }),
+        cmd("Veltrix Parts Hub", "3DC", { action: "contentCentral" }),
+        cmd("Virtual Companion", "AI", { action: "assistant" })
+      ],
+      Files: [
+        cmd("New", "N", { action: "new" }),
+        cmd("Open", "O", { action: "open" }),
+        cmd("Save", "S", { action: "save" }),
+        cmd("Download JSON", "J", { action: "download" }),
+        cmd("Export SVG", "SVG", { action: "svg" }),
+        cmd("Export DXF", "DXF", { action: "dxf" }),
+        cmd("Export PNG", "PNG", { action: "png" }),
+        cmd("Export STL", "STL", { action: "stl" }),
+        cmd("Export OBJ", "OBJ", { action: "obj" }),
+        cmd("Project Bundle", "PB", { action: "packAndGo" }),
+        cmd("Defeature", "DF", { action: "defeature" }),
+        cmd("Lightweight Config", "LC", { action: "speedPak" })
+      ]
+    };
+
+    let state = makeInitialState();
+    let transient = {
+      drawing: false,
+      start: null,
+      preview: null,
+      dragId: null,
+      dragLast: null,
+      dragSnapshot: null,
+      dragMoved: false,
+      arcStep: 0,
+      arcData: null,
+      splinePoints: [],
+      motion: false,
+      toastTimer: null
+    };
+
+    const threeState = {
+      ready: false,
+      missing: false,
+      scene: null,
+      camera: null,
+      renderer: null,
+      controls: null,
+      modelGroup: null,
+      helperGroup: null,
+      raycaster: null,
+      pointer: null,
+      interactive: [],
+      hovered: null,
+      clipPlane: null,
+      lastView: "",
+      animationStarted: false
+    };
+
+    function cmd(label, icon, options) {
+      return { label, icon, ...options };
+    }
+
+    function makeInitialState() {
+      return {
+        name: "Part Studio 1",
+        activeTab: "Sketch",
+        workspace: "sketch",
+        tool: "select",
+        view: "front",
+        unit: "mm",
+        grid: true,
+        snap: true,
+        snapSize: 10,
+        depth: 40,
+        amount: 5,
+        zoom: 1,
+        pan: { x: 0, y: 0 },
+        nextId: 1,
+        entities: [],
+        dimensions: [],
+        features: [],
+        components: [],
+        mates: [],
+        drawing: { views: [], tables: [], annotations: [] },
+        reports: [],
+        selected: [],
+        selectedComponents: [],
+        history: [],
+        future: [],
+        dirty: false,
+        appearance: "shaded",
+        renderMode: "edges",
+        sectionView: false
+      };
+    }
+
+    function id(prefix) {
+      const value = `${prefix}${state.nextId}`;
+      state.nextId += 1;
+      return value;
+    }
+
+    function snapshot() {
+      const copy = cleanState();
+      state.history.push(JSON.stringify(copy));
+      if (state.history.length > 80) state.history.shift();
+      state.future = [];
+      state.dirty = true;
+      savedState.textContent = "Unsaved changes";
+    }
+
+    function cleanState() {
+      const { history, future, ...rest } = state;
+      return JSON.parse(JSON.stringify(rest));
+    }
+
+    function restore(serialized) {
+      const restored = typeof serialized === "string" ? JSON.parse(serialized) : serialized;
+      const history = state.history;
+      const future = state.future;
+      state = { ...makeInitialState(), ...restored, history, future };
+      transient = { ...transient, drawing: false, start: null, preview: null, dragId: null, dragLast: null, arcStep: 0, arcData: null, splinePoints: [] };
+      renderAll();
+    }
+
+    function undo() {
+      if (!state.history.length) return notify("Nothing to undo");
+      state.future.push(JSON.stringify(cleanState()));
+      restore(state.history.pop());
+      state.dirty = true;
+      notify("Undo");
+    }
+
+    function redo() {
+      if (!state.future.length) return notify("Nothing to redo");
+      state.history.push(JSON.stringify(cleanState()));
+      restore(state.future.pop());
+      state.dirty = true;
+      notify("Redo");
+    }
+
+    function setTab(tab) {
+      state.activeTab = tab;
+      state.workspace = tabWorkspace(tab);
+      if (tab !== "Sketch" && state.tool !== "assemblyMove") state.tool = "select";
+      if (tab === "Assembly") state.tool = "assemblyMove";
+      viewTitle.textContent = `${tab} - ${viewLabel()}`;
+      renderAll();
+    }
+
+    function tabWorkspace(tab) {
+      if (tab === "Sketch") return "sketch";
+      if (["Features", "Surfaces", "Sheet Metal", "Weldments", "Mold Tools", "Add-Ins"].includes(tab)) return "model";
+      if (tab === "Assembly") return "assembly";
+      if (tab === "Drawing") return "drawing";
+      if (tab === "Evaluate") return "evaluate";
+      return state.workspace;
+    }
+
+    function setTool(tool) {
+      state.tool = tool;
+      transient.start = null;
+      transient.preview = null;
+      transient.arcStep = 0;
+      transient.arcData = null;
+      transient.splinePoints = [];
+      statusMessage.textContent = `${toolName(tool)} active`;
+      renderCommands();
+      renderProps();
+      render();
+    }
+
+    function toolName(tool) {
+      return tool.replace(/([A-Z])/g, " $1").replace(/^./, c => c.toUpperCase());
+    }
+
+    function openExtrudeDialog() {
+      extrudeDepthInput.value = Number(state.depth || 40);
+      updateExtrudePreview();
+      extrudeOverlay.classList.add("open");
+      extrudeOverlay.setAttribute("aria-hidden", "false");
+      extrudeDepthInput.focus();
+      extrudeDepthInput.select();
+    }
+
+    function closeExtrudeDialog() {
+      extrudeOverlay.classList.remove("open");
+      extrudeOverlay.setAttribute("aria-hidden", "true");
+    }
+
+    function updateExtrudePreview() {
+      const value = Number(extrudeDepthInput.value);
+      const safeValue = Number.isFinite(value) && value > 0 ? value : Number(state.depth || 40);
+      extrudePreviewBadge.textContent = `Preview: ${safeValue} ${state.unit}`;
+    }
+
+    function confirmExtrude() {
+      const value = Number(extrudeDepthInput.value);
+      if (!Number.isFinite(value) || value <= 0) {
+        notify("Enter a valid extrusion size");
+        return;
+      }
+      state.depth = value;
+      closeExtrudeDialog();
+      addFeature("extrude", "Extruded Boss/Base");
+    }
+
+    function runCommand(action) {
+      const commandActions = {
+        new: newProject,
+        open: () => fileInput.click(),
+        save: saveLocal,
+        download: downloadJson,
+        svg: exportSvg,
+        dxf: exportDxf,
+        png: exportPng,
+        stl: exportStl,
+        obj: exportObj,
+        undo,
+        redo,
+        rebuild,
+        print: () => window.print(),
+        zoomIn: () => changeZoom(1.18),
+        zoomOut: () => changeZoom(1 / 1.18),
+        zoomFit,
+        grid: () => { state.grid = !state.grid; render(); },
+        renderMode: cycleRenderMode,
+        section3d: toggleSectionView,
+        offset: () => offsetSelected(20),
+        mirrorSketch,
+        linearPattern,
+        circularPattern,
+        relationHorizontal: () => applyRelation("Horizontal"),
+        relationVertical: () => applyRelation("Vertical"),
+        relationFix: () => applyRelation("Fix"),
+        repairSketch,
+        extrude: () => openExtrudeDialog(),
+        revolve: () => addFeature("revolve", "Revolved Boss/Base"),
+        sweep: () => addFeature("sweep", "Swept Boss/Base"),
+        loft: () => addFeature("loft", "Lofted Boss/Base"),
+        boundary: () => addFeature("boundary", "Boundary Boss/Base"),
+        cut: () => addFeature("cut", "Extruded Cut"),
+        hole: holeWizard,
+        fillet: () => modifySelected("fillet", "Fillet"),
+        chamfer: () => modifySelected("chamfer", "Chamfer"),
+        shell: () => addFeature("shell", "Shell"),
+        draft: () => addFeature("draft", "Draft"),
+        rib: () => addFeature("rib", "Rib"),
+        wrap: () => addFeature("wrap", "Wrap"),
+        dome: () => addFeature("dome", "Dome"),
+        flex: () => addFeature("flex", "Flex"),
+        deform: () => addFeature("deform", "Deform"),
+        freeForm: () => addFeature("freeform", "Free Form"),
+        plane: () => addReference("plane"),
+        axis: () => addReference("axis"),
+        helix: () => addFeature("helix", "Helix and Spiral"),
+        combine: () => addFeature("combine", "Combine Bodies"),
+        moveFace: () => addFeature("moveface", "Move Face"),
+        surfaceExtrude: () => addFeature("surface", "Extruded Surface"),
+        surfaceRevolve: () => addFeature("surface", "Revolved Surface"),
+        surfaceSweep: () => addFeature("surface", "Swept Surface"),
+        surfaceLoft: () => addFeature("surface", "Lofted Surface"),
+        surfaceBoundary: () => addFeature("surface", "Boundary Surface"),
+        surfaceFill: () => addFeature("surface", "Filled Surface"),
+        surfacePlanar: () => addFeature("surface", "Planar Surface"),
+        surfaceOffset: () => addFeature("surface", "Offset Surface"),
+        surfaceKnit: () => addFeature("surface", "Knit Surface"),
+        surfaceTrim: () => addFeature("surface", "Trim Surface"),
+        surfaceThicken: () => addFeature("thicken", "Thicken Surface"),
+        surfaceFlatten: () => addFeature("surface", "Surface Flatten"),
+        baseFlange: () => sheetFeature("Base Flange/Tab"),
+        edgeFlange: () => sheetFeature("Edge Flange"),
+        miterFlange: () => sheetFeature("Miter Flange"),
+        hem: () => sheetFeature("Hem"),
+        jog: () => sheetFeature("Jog"),
+        sketchedBend: () => sheetFeature("Sketched Bend"),
+        closedCorner: () => sheetFeature("Closed Corner"),
+        unfold: () => sheetFeature("Unfold"),
+        fold: () => sheetFeature("Fold"),
+        flattenSheet: () => sheetFeature("Flatten", { flat: true }),
+        rip: () => sheetFeature("Rip"),
+        gusset: () => sheetFeature("Gusset"),
+        vent: () => sheetFeature("Vent"),
+        structuralMember,
+        trimExtend: () => addFeature("weldment", "Trim/Extend"),
+        endCap: () => addFeature("weldment", "End Cap"),
+        weldGusset: () => addFeature("weldment", "Weldment Gusset"),
+        weldBead: () => addFeature("weldment", "Weld Bead"),
+        cutList,
+        structureSystem: structuralMember,
+        draftAnalysis: () => addReport("Draft Analysis", "Faces are colored by draft direction in the graphics area."),
+        scalePart: () => scaleSelected(1.15),
+        partingLine: () => addFeature("mold", "Parting Line"),
+        shutOff: () => addFeature("mold", "Shut-Off Surfaces"),
+        partingSurface: () => addFeature("mold", "Parting Surface"),
+        toolingSplit: () => addFeature("mold", "Tooling Split"),
+        core: () => addFeature("mold", "Core"),
+        interlock: () => addFeature("mold", "Interlock Surface"),
+        ejectorPins: ejectorPins,
+        insertComponent,
+        mateCoincident: () => addMate("Coincident"),
+        mateConcentric: () => addMate("Concentric"),
+        mateDistance: () => addMate("Distance"),
+        mateAngle: () => addMate("Angle"),
+        mateWidth: () => addMate("Width"),
+        mateGear: () => addMate("Gear"),
+        explode,
+        interference,
+        holeAlignment: () => addReport("Hole Alignment", "Hole centerlines are checked against selected components."),
+        motionStudy,
+        standardViews,
+        projectedView: () => drawingOp("Projected View"),
+        sectionView: () => drawingOp("Section View"),
+        detailView: () => drawingOp("Detail View"),
+        breakView: () => drawingOp("Break View"),
+        modelItems: () => drawingOp("Model Items"),
+        note: () => addNote(),
+        balloon: () => drawingOp("Balloon"),
+        bom,
+        revisionTable: () => drawingOp("Revision Table"),
+        holeCallout: () => drawingOp("Hole Callout"),
+        mbd: () => drawingOp("MBD 3D PDF Package"),
+        measure: measure,
+        massProperties: () => addReport("Mass Properties", massPropertiesText()),
+        sectionProperties: () => addReport("Section Properties", sectionPropertiesText()),
+        sensor: () => addReport("Sensor", "Sensor added for sketch entity count and mass threshold."),
+        geometryAnalysis: () => addReport("Geometry Analysis", geometryAnalysisText()),
+        thicknessAnalysis: () => addReport("Thickness Analysis", "Minimum wall estimate is based on feature depth and shell amount."),
+        symmetryCheck: () => addReport("Symmetry Check", symmetryText()),
+        compareDocs: () => addReport("Compare Documents", "Current project compared against the last saved browser state."),
+        curvature: () => addReport("Curvature Analysis", "Curvature combs shown for circles, arcs, splines, and slots."),
+        zebra: () => addReport("Zebra Stripes", "Reflective stripes enabled on model preview."),
+        sustainability: () => addReport("Sustainability", "Material impact estimated from projected volume and default steel density."),
+        simulation,
+        flow,
+        routing: () => addFeature("routing", "Routing Path"),
+        plastics: () => addReport("Plastics", "Fill confidence estimated from projected wall thickness."),
+        pdm: () => addReport("PDM", `Version ${state.reports.length + 1} stored in browser project history.`),
+        cam: () => addFeature("cam", "2.5 Axis Toolpath"),
+        electrical: () => addFeature("electrical", "Harness Route"),
+        visualize,
+        toolbox,
+        contentCentral,
+        assistant: () => notify("Virtual Companion: try creating a rectangle, then use Extruded Boss/Base."),
+        packAndGo: packAndGo,
+        defeature: defeature,
+        speedPak: () => addReport("Lightweight Config", "Lightweight assembly configuration generated."),
+        dxf: exportDxf
+      };
+      if (commandActions[action]) commandActions[action]();
+    }
+
+    function renderTabs() {
+      commandTabs.innerHTML = tabs.map(tab => `
+        <button class="tab-btn ${tab === state.activeTab ? "active" : ""}" data-tab="${tab}">${tab}</button>
+      `).join("");
+    }
+
+    function renderCommands() {
+      const list = commands[state.activeTab] || [];
+      commandStrip.innerHTML = list.map(item => {
+        const active = item.tool && item.tool === state.tool;
+        return `
+          <button class="tool-btn ${active ? "active" : ""}" title="${item.label}" data-tool="${item.tool || ""}" data-action="${item.action || ""}">
+            <span class="tool-icon">${item.icon}</span>
+            <span>${item.label}</span>
+          </button>
+        `;
+      }).join("");
+    }
+
+    function renderTree() {
+      const entityRows = state.entities.map(entity => treeRow(entity.id, entity.name || entity.type, entity.type, state.selected.includes(entity.id), "teal"));
+      const dimRows = state.dimensions.map(dim => treeRow(dim.id, dim.label, "Dimension", false, "green"));
+      const featureRows = state.features.map(feature => treeRow(feature.id, feature.name, feature.type, false, feature.type === "cut" ? "red" : "green"));
+      const componentRows = state.components.map(component => treeRow(component.id, component.name, "Component", state.selectedComponents.includes(component.id), "teal"));
+      const mateRows = state.mates.map(mate => treeRow(mate.id, mate.type, "Mate", false, "green"));
+      const reportRows = state.reports.slice(-8).map(report => treeRow(report.id, report.name, "Report", false, "red"));
+      treeBody.innerHTML = `
+        ${treeGroup("Sketch Entities", entityRows, state.entities.length)}
+        ${treeGroup("Dimensions", dimRows, state.dimensions.length)}
+        ${treeGroup("Features", featureRows, state.features.length)}
+        ${treeGroup("Assembly", componentRows + mateRows, state.components.length + state.mates.length)}
+        ${treeGroup("Evaluate", reportRows, state.reports.length)}
+      `;
+    }
+
+    function treeGroup(title, rows, count) {
+      return `
+        <section class="tree-group">
+          <h2 class="tree-group-title"><span>${title}</span><span>${count}</span></h2>
+          ${rows || `<div class="mini-row"><strong>Empty</strong><span class="pill">0</span></div>`}
+        </section>
+      `;
+    }
+
+    function treeRow(idValue, name, type, selected, color) {
+      return `
+        <div class="tree-item ${selected ? "selected" : ""}" data-tree-id="${idValue}">
+          <span class="tree-dot ${color}"></span>
+          <span class="tree-name">${escapeHtml(name)}</span>
+          <span class="tree-count">${escapeHtml(type)}</span>
+        </div>
+      `;
+    }
+
+    function renderProps() {
+      const selected = state.entities.find(entity => entity.id === state.selected[0]);
+      const metrics = computeMetrics();
+      const reports = state.reports.slice(-6).reverse().map(report => `
+        <div class="mini-row"><strong>${escapeHtml(report.name)}</strong><span class="pill">${report.value}</span></div>
+      `).join("");
+      propsBody.innerHTML = `
+        <section class="property-section">
+          <h3>Active Tool</h3>
+          <div class="property-grid">
+            <div class="field">
+              <label>Workspace</label>
+              <input value="${escapeHtml(state.activeTab)}" readonly>
+            </div>
+            <div class="field">
+              <label>Tool</label>
+              <input value="${escapeHtml(toolName(state.tool))}" readonly>
+            </div>
+            <div class="field">
+              <label>Units</label>
+              <select data-prop="unit">
+                ${["mm", "inch"].map(unit => `<option value="${unit}" ${state.unit === unit ? "selected" : ""}>${unit}</option>`).join("")}
+              </select>
+            </div>
+            <div class="field">
+              <label>Snap</label>
+              <select data-prop="snap">
+                <option value="true" ${state.snap ? "selected" : ""}>On</option>
+                <option value="false" ${!state.snap ? "selected" : ""}>Off</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>Grid</label>
+              <input type="number" min="1" step="1" value="${state.snapSize}" data-prop="snapSize">
+            </div>
+            <div class="field">
+              <label>Depth (${state.unit})</label>
+              <input type="number" step="5" value="${state.depth || 40}" data-prop="depth">
+            </div>
+            <div class="field full">
+              <label>Live Extrude Depth</label>
+              <input type="range" min="2" max="220" step="1" value="${state.depth || 40}" data-live-prop="depth">
+            </div>
+          </div>
+        </section>
+
+        <section class="property-section">
+          <h3>Selection</h3>
+          ${selected ? selectedProperties(selected) : `<div class="list-box"><div class="mini-row"><strong>${state.selectedComponents.length ? `${state.selectedComponents.length} component(s)` : "No sketch selection"}</strong><span class="pill">${state.tool}</span></div></div>`}
+        </section>
+
+        <section class="property-section">
+          <h3>Quick Actions</h3>
+          <div class="action-grid">
+            <button class="action-btn primary" data-action="extrude">Extrude</button>
+            <button class="action-btn" data-action="hole">Hole</button>
+            <button class="action-btn" data-action="linearPattern">Linear Pattern</button>
+            <button class="action-btn" data-action="standardViews">Drawing</button>
+            <button class="action-btn" data-action="massProperties">Mass</button>
+            <button class="action-btn" data-action="insertComponent">Component</button>
+          </div>
+        </section>
+
+        <section class="property-section">
+          <h3>Live Metrics</h3>
+          <div class="list-box">
+            <div class="mini-row"><strong>Entities</strong><span class="pill">${state.entities.length}</span></div>
+            <div class="mini-row"><strong>Closed Profiles</strong><span class="pill">${closedEntities().length}</span></div>
+            <div class="mini-row"><strong>Area</strong><span class="pill">${format(metrics.area)}</span></div>
+            <div class="mini-row"><strong>Perimeter</strong><span class="pill">${format(metrics.perimeter)}</span></div>
+            <div class="mini-row"><strong>Volume</strong><span class="pill">${format(metrics.volume)}</span></div>
+          </div>
+        </section>
+
+        <section class="property-section">
+          <h3>Reports</h3>
+          <div class="list-box">${reports || `<div class="mini-row"><strong>No reports yet</strong><span class="pill">0</span></div>`}</div>
+        </section>
+      `;
+    }
+
+    function selectedProperties(entity) {
+      const fields = [];
+      if (entity.type === "line" || entity.type === "centerline") {
+        fields.push(field("X1", "x1", entity.x1), field("Y1", "y1", entity.y1), field("X2", "x2", entity.x2), field("Y2", "y2", entity.y2));
+      } else if (entity.type === "rect") {
+        fields.push(field("X", "x", entity.x), field("Y", "y", entity.y), field("Width", "w", entity.w), field("Height", "h", entity.h));
+      } else if (entity.type === "circle") {
+        fields.push(field("X", "x", entity.x), field("Y", "y", entity.y), field("Radius", "r", entity.r));
+      } else if (entity.type === "polygon") {
+        fields.push(field("X", "x", entity.x), field("Y", "y", entity.y), field("Radius", "r", entity.r), field("Sides", "sides", entity.sides));
+      } else if (entity.type === "slot") {
+        fields.push(field("X1", "x1", entity.x1), field("Y1", "y1", entity.y1), field("X2", "x2", entity.x2), field("Y2", "y2", entity.y2), field("Radius", "r", entity.r));
+      } else if (entity.type === "text") {
+        fields.push(`<div class="field full"><label>Text</label><input value="${escapeHtml(entity.text)}" data-selected-prop="text"></div>`);
+      }
+      return `
+        <div class="property-grid">
+          <div class="field full"><label>Name</label><input value="${escapeHtml(entity.name || entity.type)}" data-selected-prop="name"></div>
+          ${fields.join("")}
+        </div>
+      `;
+    }
+
+    function field(label, prop, value) {
+      return `<div class="field"><label>${label}</label><input type="number" step="1" value="${Number(value || 0).toFixed(2)}" data-selected-prop="${prop}"></div>`;
+    }
+
+    function renderOverlay() {
+      const metrics = computeMetrics();
+      const badges = [
+        `${state.activeTab}`,
+        `${state.entities.length} entities`,
+        `${state.features.length} features`,
+        `${closedEntities().length} closed profiles`,
+        `Area ${format(metrics.area)} ${state.unit}2`,
+        `${isThreeWorkspace() && threeState.ready ? "Three.js viewport" : "2D sketch canvas"}`,
+        `Render ${state.renderMode || "edges"}`
+      ];
+      if (state.sectionView) badges.push("Section active");
+      viewOverlay.innerHTML = badges.map(text => `<span class="badge">${text}</span>`).join("");
+    }
+
+    function renderAll() {
+      renderTabs();
+      renderCommands();
+      renderTree();
+      renderProps();
+      renderOverlay();
+      render();
+      projectName.textContent = state.name;
+      unitReadout.textContent = state.unit === "mm" ? "MMGS" : "IPS";
+      bottomMessage.textContent = `${state.entities.length} sketch entities, ${state.features.length} features, ${state.components.length} components`;
+      definitionState.textContent = definitionStatus();
+    }
+
+    function resizeCanvas() {
+      const rect = canvasWrap.getBoundingClientRect();
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.max(1, Math.floor(rect.width * dpr));
+      canvas.height = Math.max(1, Math.floor(rect.height * dpr));
+      canvas.style.width = `${rect.width}px`;
+      canvas.style.height = `${rect.height}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      resizeThree();
+      if (!state.pan.x && !state.pan.y) {
+        state.pan.x = rect.width / 2;
+        state.pan.y = rect.height / 2;
+      }
+      render();
+    }
+
+    function render() {
+      const rect = canvasWrap.getBoundingClientRect();
+      ctx.clearRect(0, 0, rect.width, rect.height);
+      const threeActive = isThreeWorkspace() && initThree();
+      canvasWrap.classList.toggle("three-active", threeActive);
+      if (threeActive) {
+        updateThreeScene();
+        if (state.workspace === "evaluate") drawEvaluatePanel(rect.width, rect.height);
+      } else {
+        drawBackground(rect.width, rect.height);
+        if (state.workspace === "assembly") drawAssembly(rect.width, rect.height);
+        else if (state.workspace === "drawing") drawDrawing(rect.width, rect.height);
+        else if (state.workspace === "evaluate") drawEvaluate(rect.width, rect.height);
+        else if (state.workspace === "model") drawModel(rect.width, rect.height);
+        else drawSketch();
+        drawPreview();
+      }
+      zoomReadout.textContent = `${Math.round(state.zoom * 100)}%`;
+      viewTitle.textContent = `${state.activeTab} - ${viewLabel()}`;
+      renderOverlay();
+    }
+
+    function isThreeWorkspace() {
+      return ["model", "assembly", "evaluate"].includes(state.workspace);
+    }
+
+    function initThree() {
+      if (threeState.ready) return true;
+      if (!window.THREE || !threeViewport) {
+        if (!threeState.missing) {
+          threeState.missing = true;
+          statusMessage.textContent = "Three.js viewport unavailable; using 2D fallback";
+        }
+        return false;
+      }
+
+      const THREE = window.THREE;
+      threeState.scene = new THREE.Scene();
+      threeState.scene.background = new THREE.Color(0xf8fbfd);
+      threeState.camera = new THREE.PerspectiveCamera(35, 1, 0.1, 5000);
+      threeState.camera.position.set(260, -260, 220);
+
+      threeState.renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });
+      threeState.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+      threeState.renderer.outputEncoding = THREE.sRGBEncoding;
+      threeState.renderer.localClippingEnabled = true;
+      threeViewport.appendChild(threeState.renderer.domElement);
+
+      threeState.modelGroup = new THREE.Group();
+      threeState.helperGroup = new THREE.Group();
+      threeState.scene.add(threeState.modelGroup, threeState.helperGroup);
+      threeState.scene.add(new THREE.AmbientLight(0xffffff, 0.48));
+      const hemi = new THREE.HemisphereLight(0xffffff, 0xdde7ee, 0.42);
+      threeState.scene.add(hemi);
+      const key = new THREE.DirectionalLight(0xffffff, 0.88);
+      key.position.set(220, -300, 420);
+      threeState.scene.add(key);
+      const fill = new THREE.DirectionalLight(0xdcefff, 0.38);
+      fill.position.set(-240, 180, 160);
+      threeState.scene.add(fill);
+
+      threeState.raycaster = new THREE.Raycaster();
+      threeState.pointer = new THREE.Vector2();
+      threeState.clipPlane = new THREE.Plane(new THREE.Vector3(-1, 0, 0), 0);
+      if (THREE.OrbitControls) {
+        threeState.controls = new THREE.OrbitControls(threeState.camera, canvasWrap);
+        threeState.controls.enableDamping = true;
+        threeState.controls.dampingFactor = 0.08;
+        threeState.controls.screenSpacePanning = true;
+        threeState.controls.target.set(0, 0, 20);
+      }
+      resizeThree();
+      threeState.ready = true;
+      if (!threeState.animationStarted) {
+        threeState.animationStarted = true;
+        animateThree();
+      }
+      return true;
+    }
+
+    function animateThree() {
+      requestAnimationFrame(animateThree);
+      if (!threeState.ready) return;
+      if (threeState.controls) threeState.controls.update();
+      threeState.renderer.render(threeState.scene, threeState.camera);
+    }
+
+    function resizeThree() {
+      if (!threeState.ready) return;
+      const rect = canvasWrap.getBoundingClientRect();
+      const width = Math.max(1, Math.floor(rect.width));
+      const height = Math.max(1, Math.floor(rect.height));
+      threeState.camera.aspect = width / height;
+      threeState.camera.updateProjectionMatrix();
+      threeState.renderer.setSize(width, height, false);
+    }
+
+    function clearThreeGroup(group) {
+      if (!group) return;
+      while (group.children.length) {
+        const child = group.children.pop();
+        child.traverse(item => {
+          if (item.geometry) item.geometry.dispose();
+          if (item.material) {
+            const materials = Array.isArray(item.material) ? item.material : [item.material];
+            materials.forEach(material => material.dispose && material.dispose());
+          }
+        });
+      }
+    }
+
+    function updateThreeScene() {
+      if (!threeState.ready) return;
+      resizeThree();
+      clearThreeGroup(threeState.modelGroup);
+      clearThreeGroup(threeState.helperGroup);
+      threeState.interactive = [];
+      threeState.hovered = null;
+      threeState.renderer.localClippingEnabled = Boolean(state.sectionView);
+
+      buildThreeGrid();
+      if (state.workspace === "assembly") buildThreeAssembly();
+      else buildThreeModel();
+      buildThreeReferences();
+      buildThreeSketchWire();
+      buildThreeAnalysisEffects();
+
+      if (threeState.lastView !== state.view || !threeState.fittedOnce) {
+        fitThreeCamera(state.view);
+        threeState.lastView = state.view;
+        threeState.fittedOnce = true;
+      }
+    }
+
+    function buildThreeGrid() {
+      const THREE = window.THREE;
+      const grid = new THREE.Group();
+      grid.visible = state.grid;
+      const size = 520;
+      const step = Math.max(5, Number(state.snapSize || 10));
+      const minor = new THREE.LineBasicMaterial({ color: 0xd8e2ea, transparent: true, opacity: 0.72 });
+      const xAxis = new THREE.LineBasicMaterial({ color: 0xd71920, transparent: true, opacity: 0.5 });
+      const yAxis = new THREE.LineBasicMaterial({ color: 0x087d83, transparent: true, opacity: 0.55 });
+      for (let i = -size; i <= size; i += step) {
+        grid.add(line3([{ x: -size, y: i, z: 0 }, { x: size, y: i, z: 0 }], Math.abs(i) < 0.001 ? xAxis : minor));
+        grid.add(line3([{ x: i, y: -size, z: 0 }, { x: i, y: size, z: 0 }], Math.abs(i) < 0.001 ? yAxis : minor));
+      }
+      const zAxis = line3([{ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 180 }], new THREE.LineBasicMaterial({ color: 0x285f9f, transparent: true, opacity: 0.55 }));
+      grid.add(zAxis);
+      threeState.helperGroup.add(grid);
+    }
+
+    function buildThreeModel() {
+      const closed = closedEntities();
+      const cutFeatures = state.features.filter(feature => feature.type === "cut");
+      const cutIds = new Set(cutFeatures.flatMap(feature => feature.sources || []));
+      const cutEntities = closed.filter(entity => cutIds.has(entity.id));
+      const solidFeatures = state.features.filter(feature => isSolidFeature(feature.type));
+      const baseSources = solidFeatures.length
+        ? solidFeatures.flatMap(feature => (feature.sources || []).map(sourceId => ({ feature, entity: state.entities.find(entity => entity.id === sourceId) })))
+        : closed.filter(entity => !cutIds.has(entity.id)).map(entity => ({ feature: null, entity }));
+      const usableSources = baseSources.filter(item => item.entity && isClosedProfile(item.entity) && !cutIds.has(item.entity.id));
+
+      if (!usableSources.length && closed.length) {
+        closed.filter(entity => !cutIds.has(entity.id)).forEach(entity => addThreeProfile(entity, null, cutEntities));
+      } else {
+        usableSources.forEach(item => addThreeProfile(item.entity, item.feature, cutEntities));
+      }
+
+      state.features.filter(feature => ["surface", "thicken"].includes(feature.type)).forEach((feature, index) => {
+        const entity = sourceEntity(feature) || closed[index % Math.max(1, closed.length)];
+        if (entity) addThreeSurface(entity, feature);
+      });
+
+      state.features.filter(feature => ["weldment", "routing", "cam", "electrical"].includes(feature.type)).forEach(feature => {
+        (feature.sources || []).map(sourceId => state.entities.find(entity => entity.id === sourceId)).filter(Boolean).forEach(entity => {
+          if (entity.type === "line" || entity.type === "centerline") addThreeCylinderBetween(entity, feature);
+        });
+      });
+
+      cutEntities.forEach(entity => addThreeCutMarker(entity));
+    }
+
+    function buildThreeAssembly() {
+      const THREE = window.THREE;
+      if (!state.components.length) {
+        buildThreeModel();
+        return;
+      }
+      state.components.forEach((component, index) => {
+        const selected = state.selectedComponents.includes(component.id);
+        const depth = 28 + index * 4;
+        const material = bodyMaterial(selected ? 0xdff3f4 : 0xf0f5f7, selected ? 0x087d83 : 0x526678);
+        const mesh = new THREE.Mesh(new THREE.BoxGeometry(component.w, component.h, depth), material);
+        mesh.position.set(component.x, component.y, depth / 2);
+        mesh.rotation.z = (component.angle || 0) * Math.PI / 180;
+        mesh.userData = { componentId: component.id, label: component.name, exportable: true };
+        threeState.modelGroup.add(mesh);
+        threeState.interactive.push(mesh);
+        addEdges(mesh, selected ? 0xd71920 : 0x526678);
+      });
+      state.mates.forEach((mate, index) => {
+        const a = state.components.find(component => component.id === mate.components[0]);
+        const b = state.components.find(component => component.id === mate.components[1]);
+        if (!a || !b) return;
+        const material = new THREE.LineDashedMaterial({ color: index % 2 ? 0xb66b00 : 0x087d83, dashSize: 7, gapSize: 5 });
+        const line = line3([{ x: a.x, y: a.y, z: 44 }, { x: b.x, y: b.y, z: 44 }], material);
+        line.computeLineDistances();
+        threeState.modelGroup.add(line);
+      });
+    }
+
+    function addThreeProfile(entity, feature, cutEntities) {
+      const THREE = window.THREE;
+      const depth = Number((feature && feature.depth) || state.depth || 40);
+      const holes = cutEntities.filter(cut => cut.id !== entity.id && cutInsideEntity(entity, cut));
+      const shape = shapeFromEntity(entity, holes);
+      if (!shape) return;
+      const bevel = Number(entity.fillet || 0) > 0;
+      const geometry = new THREE.ExtrudeGeometry(shape, {
+        depth,
+        bevelEnabled: bevel,
+        bevelSize: Math.min(Math.abs(entity.fillet || 0), Math.max(1, Math.min(depth, 12))),
+        bevelThickness: Math.min(Math.abs(entity.fillet || 0), Math.max(1, depth * 0.18)),
+        bevelSegments: bevel ? 8 : 1,
+        curveSegments: 48,
+        steps: 1
+      });
+      geometry.computeVertexNormals();
+      const selected = state.selected.includes(entity.id);
+      const color = featureColor(feature ? feature.type : "extrude", selected);
+      const material = bodyMaterial(color, selected ? 0xd71920 : 0x526678);
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.userData = { entityId: entity.id, featureId: feature && feature.id, label: entity.name || entity.type, exportable: true };
+      threeState.modelGroup.add(mesh);
+      threeState.interactive.push(mesh);
+      addEdges(mesh, selected ? 0xd71920 : 0x526678);
+    }
+
+    function addThreeSurface(entity, feature) {
+      const THREE = window.THREE;
+      const shape = shapeFromEntity(entity, []);
+      if (!shape) return;
+      const geometry = new THREE.ShapeGeometry(shape, 48);
+      const material = new THREE.MeshStandardMaterial({
+        color: 0x9fe7ea,
+        transparent: true,
+        opacity: 0.42,
+        roughness: 0.48,
+        metalness: 0.04,
+        side: THREE.DoubleSide,
+        clippingPlanes: sectionPlanes()
+      });
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.z = Number(feature.depth || state.depth || 40) + 3;
+      mesh.userData = { featureId: feature.id, exportable: false };
+      threeState.modelGroup.add(mesh);
+      addEdges(mesh, 0x087d83);
+    }
+
+    function addThreeCylinderBetween(entity, feature) {
+      const THREE = window.THREE;
+      const a = new THREE.Vector3(entity.x1, entity.y1, 18);
+      const b = new THREE.Vector3(entity.x2, entity.y2, 18);
+      const length = a.distanceTo(b);
+      if (!length) return;
+      const geometry = new THREE.CylinderGeometry(8, 8, length, 24);
+      const material = bodyMaterial(featureColor(feature.type, false), 0x526678);
+      const mesh = new THREE.Mesh(geometry, material);
+      mesh.position.copy(a).add(b).multiplyScalar(0.5);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), b.clone().sub(a).normalize());
+      mesh.userData = { featureId: feature.id, label: feature.name, exportable: true };
+      threeState.modelGroup.add(mesh);
+      threeState.interactive.push(mesh);
+      addEdges(mesh, 0x526678);
+    }
+
+    function addThreeCutMarker(entity) {
+      const THREE = window.THREE;
+      if (entity.type !== "circle" && entity.type !== "slot") return;
+      const depth = Number(state.depth || 40) + 4;
+      const material = new THREE.MeshStandardMaterial({
+        color: 0xd71920,
+        transparent: true,
+        opacity: 0.16,
+        roughness: 0.55,
+        side: THREE.DoubleSide,
+        clippingPlanes: sectionPlanes()
+      });
+      if (entity.type === "circle") {
+        const mesh = new THREE.Mesh(new THREE.CylinderGeometry(Math.abs(entity.r), Math.abs(entity.r), depth, 48, 1, true), material);
+        mesh.position.set(entity.x, entity.y, depth / 2 - 2);
+        mesh.rotation.x = Math.PI / 2;
+        mesh.userData = { entityId: entity.id, label: "Cut preview", exportable: false };
+        threeState.modelGroup.add(mesh);
+        addEdges(mesh, 0xd71920);
+      } else {
+        const shape = shapeFromEntity(entity, []);
+        if (!shape) return;
+        const geometry = new THREE.ExtrudeGeometry(shape, { depth, bevelEnabled: false, curveSegments: 32 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.userData = { entityId: entity.id, label: "Cut preview", exportable: false };
+        threeState.modelGroup.add(mesh);
+        addEdges(mesh, 0xd71920);
+      }
+    }
+
+    function buildThreeReferences() {
+      const THREE = window.THREE;
+      state.features.filter(feature => feature.type === "plane" || feature.type === "axis").forEach(feature => {
+        if (feature.type === "axis") {
+          threeState.helperGroup.add(line3([{ x: -220, y: -120, z: 4 }, { x: 220, y: 120, z: 4 }], new THREE.LineDashedMaterial({ color: 0x087d83, dashSize: 10, gapSize: 6 })));
+        } else {
+          const material = new THREE.LineDashedMaterial({ color: 0xd71920, dashSize: 10, gapSize: 6 });
+          const line = line3([
+            { x: -150, y: -90, z: 4 },
+            { x: 150, y: -90, z: 4 },
+            { x: 150, y: 90, z: 4 },
+            { x: -150, y: 90, z: 4 },
+            { x: -150, y: -90, z: 4 }
+          ], material);
+          line.computeLineDistances();
+          threeState.helperGroup.add(line);
+        }
+      });
+    }
+
+    function buildThreeSketchWire() {
+      const THREE = window.THREE;
+      const z = Math.max(4, Number(state.depth || 40) + 2);
+      state.entities.forEach(entity => {
+        const selected = state.selected.includes(entity.id);
+        const material = new THREE.LineBasicMaterial({ color: selected ? 0xd71920 : 0x087d83, transparent: true, opacity: selected ? 0.95 : 0.56 });
+        const lines = entityLines(entity, z);
+        lines.forEach(points => threeState.helperGroup.add(line3(points, material)));
+      });
+    }
+
+    function buildThreeAnalysisEffects() {
+      const THREE = window.THREE;
+      if (state.appearance === "flow") {
+        const material = new THREE.LineBasicMaterial({ color: 0x087d83, transparent: true, opacity: 0.72 });
+        for (let y = -110; y <= 110; y += 44) {
+          const points = [];
+          for (let i = 0; i <= 36; i++) {
+            const t = i / 36;
+            const x = -180 + t * 360;
+            points.push({ x, y: y + Math.sin(t * Math.PI * 2) * 12, z: 90 + Math.cos(t * Math.PI) * 18 });
+          }
+          threeState.helperGroup.add(line3(points, material));
+        }
+      }
+      if (state.appearance === "visualize" || state.reports.some(report => report.name === "Zebra Stripes")) {
+        const material = new THREE.LineBasicMaterial({ color: state.appearance === "visualize" ? 0xd71920 : 0x18212b, transparent: true, opacity: 0.2 });
+        for (let x = -260; x <= 260; x += 38) {
+          threeState.helperGroup.add(line3([{ x, y: -240, z: 145 }, { x: x + 180, y: 240, z: 145 }], material));
+        }
+      }
+      if (state.sectionView) {
+        const plane = new THREE.Mesh(
+          new THREE.PlaneGeometry(260, 220),
+          new THREE.MeshBasicMaterial({ color: 0xd71920, transparent: true, opacity: 0.08, side: THREE.DoubleSide })
+        );
+        plane.rotation.y = Math.PI / 2;
+        threeState.helperGroup.add(plane);
+      }
+    }
+
+    function bodyMaterial(color, edgeColor) {
+      const THREE = window.THREE;
+      const mode = state.renderMode || "edges";
+      return new THREE.MeshStandardMaterial({
+        color,
+        roughness: state.appearance === "visualize" ? 0.18 : 0.46,
+        metalness: state.appearance === "visualize" ? 0.34 : 0.04,
+        wireframe: mode === "wireframe",
+        emissive: new THREE.Color(0x000000),
+        clippingPlanes: sectionPlanes()
+      });
+    }
+
+    function featureColor(type, selected) {
+      if (selected) return 0xffe7e8;
+      if (state.appearance === "stress") return type === "cut" ? 0xd71920 : 0xe4b34f;
+      if (["surface", "thicken"].includes(type)) return 0x9fe7ea;
+      if (["sheetmetal"].includes(type)) return 0xe9f3ff;
+      if (["weldment", "routing"].includes(type)) return 0xdfeadf;
+      if (["mold"].includes(type)) return 0xf3e8df;
+      return 0xdff3f4;
+    }
+
+    function sectionPlanes() {
+      return state.sectionView && threeState.clipPlane ? [threeState.clipPlane] : [];
+    }
+
+    function addEdges(mesh, color) {
+      if ((state.renderMode || "edges") === "shaded") return;
+      const THREE = window.THREE;
+      const geometry = new THREE.EdgesGeometry(mesh.geometry, 24);
+      const material = new THREE.LineBasicMaterial({ color, transparent: true, opacity: state.renderMode === "wireframe" ? 0.25 : 0.72, clippingPlanes: sectionPlanes() });
+      const edges = new THREE.LineSegments(geometry, material);
+      edges.position.copy(mesh.position);
+      edges.rotation.copy(mesh.rotation);
+      edges.scale.copy(mesh.scale);
+      edges.quaternion.copy(mesh.quaternion);
+      edges.userData = { exportable: false };
+      threeState.modelGroup.add(edges);
+    }
+
+    function line3(points, material) {
+      const THREE = window.THREE;
+      const geometry = new THREE.BufferGeometry().setFromPoints(points.map(point => new THREE.Vector3(point.x, point.y, point.z || 0)));
+      return new THREE.Line(geometry, material);
+    }
+
+    function shapeFromEntity(entity, holes = []) {
+      const THREE = window.THREE;
+      let shape = null;
+      if (entity.type === "rect") shape = rectShape(entity);
+      if (entity.type === "circle") {
+        shape = new THREE.Shape();
+        shape.absarc(entity.x, entity.y, Math.abs(entity.r), 0, Math.PI * 2, false);
+      }
+      if (entity.type === "polygon") {
+        const points = polygonPoints(entity);
+        shape = new THREE.Shape();
+        points.forEach((point, index) => index ? shape.lineTo(point.x, point.y) : shape.moveTo(point.x, point.y));
+        shape.closePath();
+      }
+      if (entity.type === "slot") shape = slotShape(entity);
+      if (!shape) return null;
+      holes.forEach(hole => {
+        const path = holePath(hole);
+        if (path) shape.holes.push(path);
+      });
+      return shape;
+    }
+
+    function rectShape(entity) {
+      const THREE = window.THREE;
+      const b = boundsOf(entity);
+      const x = b.x;
+      const y = b.y;
+      const w = b.w;
+      const h = b.h;
+      const fillet = Math.min(Math.abs(entity.fillet || 0), w / 2, h / 2);
+      const chamfer = !fillet ? Math.min(Math.abs(entity.chamfer || 0), w / 2, h / 2) : 0;
+      const shape = new THREE.Shape();
+      if (fillet) {
+        shape.moveTo(x + fillet, y);
+        shape.lineTo(x + w - fillet, y);
+        shape.quadraticCurveTo(x + w, y, x + w, y + fillet);
+        shape.lineTo(x + w, y + h - fillet);
+        shape.quadraticCurveTo(x + w, y + h, x + w - fillet, y + h);
+        shape.lineTo(x + fillet, y + h);
+        shape.quadraticCurveTo(x, y + h, x, y + h - fillet);
+        shape.lineTo(x, y + fillet);
+        shape.quadraticCurveTo(x, y, x + fillet, y);
+      } else if (chamfer) {
+        shape.moveTo(x + chamfer, y);
+        shape.lineTo(x + w - chamfer, y);
+        shape.lineTo(x + w, y + chamfer);
+        shape.lineTo(x + w, y + h - chamfer);
+        shape.lineTo(x + w - chamfer, y + h);
+        shape.lineTo(x + chamfer, y + h);
+        shape.lineTo(x, y + h - chamfer);
+        shape.lineTo(x, y + chamfer);
+      } else {
+        shape.moveTo(x, y);
+        shape.lineTo(x + w, y);
+        shape.lineTo(x + w, y + h);
+        shape.lineTo(x, y + h);
+      }
+      shape.closePath();
+      return shape;
+    }
+
+    function slotShape(entity) {
+      const THREE = window.THREE;
+      const shape = new THREE.Shape();
+      addSlotPath(shape, entity, false);
+      return shape;
+    }
+
+    function holePath(entity) {
+      const THREE = window.THREE;
+      if (entity.type === "circle") {
+        const path = new THREE.Path();
+        path.absarc(entity.x, entity.y, Math.abs(entity.r), 0, Math.PI * 2, true);
+        return path;
+      }
+      if (entity.type === "slot") {
+        const path = new THREE.Path();
+        addSlotPath(path, entity, true);
+        return path;
+      }
+      return null;
+    }
+
+    function addSlotPath(path, entity, clockwise) {
+      const r = Math.abs(entity.r || 1);
+      const dx = entity.x2 - entity.x1;
+      const dy = entity.y2 - entity.y1;
+      const length = Math.hypot(dx, dy) || 1;
+      const nx = -dy / length;
+      const ny = dx / length;
+      const angle = Math.atan2(ny, nx);
+      const a = { x: entity.x1, y: entity.y1 };
+      const b = { x: entity.x2, y: entity.y2 };
+      if (clockwise) {
+        path.moveTo(a.x - nx * r, a.y - ny * r);
+        path.lineTo(b.x - nx * r, b.y - ny * r);
+        path.absarc(b.x, b.y, r, angle + Math.PI, angle, true);
+        path.lineTo(a.x + nx * r, a.y + ny * r);
+        path.absarc(a.x, a.y, r, angle, angle + Math.PI, true);
+      } else {
+        path.moveTo(a.x + nx * r, a.y + ny * r);
+        path.lineTo(b.x + nx * r, b.y + ny * r);
+        path.absarc(b.x, b.y, r, angle, angle + Math.PI, false);
+        path.lineTo(a.x - nx * r, a.y - ny * r);
+        path.absarc(a.x, a.y, r, angle + Math.PI, angle, false);
+      }
+      path.closePath();
+    }
+
+    function entityLines(entity, z) {
+      if (entity.type === "line" || entity.type === "centerline") return [[{ x: entity.x1, y: entity.y1, z }, { x: entity.x2, y: entity.y2, z }]];
+      if (entity.type === "rect") {
+        const b = boundsOf(entity);
+        return [[
+          { x: b.x, y: b.y, z },
+          { x: b.x + b.w, y: b.y, z },
+          { x: b.x + b.w, y: b.y + b.h, z },
+          { x: b.x, y: b.y + b.h, z },
+          { x: b.x, y: b.y, z }
+        ]];
+      }
+      if (entity.type === "circle" || entity.type === "arc") {
+        const start = entity.type === "arc" ? entity.start : 0;
+        const end = entity.type === "arc" ? entity.end : Math.PI * 2;
+        const steps = 64;
+        const points = [];
+        for (let i = 0; i <= steps; i++) {
+          const t = start + (end - start) * i / steps;
+          points.push({ x: entity.x + Math.cos(t) * entity.r, y: entity.y + Math.sin(t) * entity.r, z });
+        }
+        return [points];
+      }
+      if (entity.type === "polygon") return [[...polygonPoints(entity).map(point => ({ ...point, z })), { ...polygonPoints(entity)[0], z }]];
+      if (entity.type === "slot") {
+        const shape = slotShape(entity);
+        return [shape.getPoints(48).map(point => ({ x: point.x, y: point.y, z }))];
+      }
+      if (entity.type === "spline") return [entity.points.map(point => ({ x: point.x, y: point.y, z }))];
+      return [];
+    }
+
+    function isClosedProfile(entity) {
+      return entity && ["rect", "circle", "polygon", "slot"].includes(entity.type);
+    }
+
+    function isSolidFeature(type) {
+      return ["extrude", "revolve", "sweep", "loft", "boundary", "sheetmetal", "shell", "draft", "rib", "wrap", "dome", "flex", "freeform", "scale", "mold", "toolbox"].includes(type);
+    }
+
+    function sourceEntity(feature) {
+      return (feature.sources || []).map(sourceId => state.entities.find(entity => entity.id === sourceId)).find(Boolean);
+    }
+
+    function cutInsideEntity(base, cut) {
+      const center = entityCenter(cut);
+      if (base.type === "rect") {
+        const b = boundsOf(base);
+        return center.x > b.x && center.x < b.x + b.w && center.y > b.y && center.y < b.y + b.h;
+      }
+      if (base.type === "circle") return dist(base, center) + Math.abs(cut.r || 0) < Math.abs(base.r);
+      if (base.type === "polygon") return pointInPolygon(center, polygonPoints(base));
+      if (base.type === "slot") return entityHit(base, center, 0);
+      return false;
+    }
+
+    function fitThreeCamera(view = "iso") {
+      if (!threeState.ready) return;
+      const THREE = window.THREE;
+      const box = new THREE.Box3().setFromObject(threeState.modelGroup);
+      const empty = !Number.isFinite(box.min.x) || box.isEmpty();
+      const center = empty ? new THREE.Vector3(0, 0, 30) : box.getCenter(new THREE.Vector3());
+      const size = empty ? new THREE.Vector3(240, 160, 90) : box.getSize(new THREE.Vector3());
+      const maxDim = Math.max(size.x, size.y, size.z, 120);
+      const fov = THREE.MathUtils.degToRad(threeState.camera.fov);
+      const distance = Math.max(180, maxDim / (2 * Math.tan(fov / 2)) * 1.6);
+      const directions = {
+        front: new THREE.Vector3(0, 0, 1),
+        top: new THREE.Vector3(0, 1, 0.12),
+        iso: new THREE.Vector3(1, -1.15, 0.85)
+      };
+      const direction = (directions[view] || directions.iso).normalize();
+      threeState.camera.position.copy(center).add(direction.multiplyScalar(distance));
+      threeState.camera.near = Math.max(0.1, distance / 200);
+      threeState.camera.far = distance * 20;
+      threeState.camera.lookAt(center);
+      threeState.camera.updateProjectionMatrix();
+      if (threeState.controls) {
+        threeState.controls.target.copy(center);
+        threeState.controls.update();
+      }
+    }
+
+    function changeThreeZoom(factor) {
+      if (!threeState.ready || !threeState.controls) return;
+      const offset = threeState.camera.position.clone().sub(threeState.controls.target);
+      offset.multiplyScalar(1 / factor);
+      threeState.camera.position.copy(threeState.controls.target).add(offset);
+      threeState.controls.update();
+    }
+
+    function cycleRenderMode() {
+      const modes = ["edges", "shaded", "wireframe"];
+      const next = modes[(modes.indexOf(state.renderMode || "edges") + 1) % modes.length];
+      state.renderMode = next;
+      notify(`Render mode: ${next}`);
+      renderAll();
+    }
+
+    function toggleSectionView() {
+      state.sectionView = !state.sectionView;
+      notify(state.sectionView ? "Section view enabled" : "Section view disabled");
+      renderAll();
+    }
+
+    function pickThree(event) {
+      if (!threeState.ready) return null;
+      const rect = canvasWrap.getBoundingClientRect();
+      threeState.pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+      threeState.pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+      threeState.raycaster.setFromCamera(threeState.pointer, threeState.camera);
+      return threeState.raycaster.intersectObjects(threeState.interactive, true)[0] || null;
+    }
+
+    function handleThreePointerDown(event) {
+      const hit = pickThree(event);
+      if (!hit) return;
+      const data = hit.object.userData || {};
+      if (data.entityId) {
+        state.selected = [data.entityId];
+        state.selectedComponents = [];
+        notify(`${data.label || "Profile"} selected`);
+      }
+      if (data.componentId) {
+        state.selectedComponents = [data.componentId];
+        state.selected = [];
+        notify(`${data.label || "Component"} selected`);
+      }
+      renderAll();
+    }
+
+    function updateThreeHover(event) {
+      const hit = pickThree(event);
+      const object = hit && hit.object;
+      if (threeState.hovered && threeState.hovered !== object && threeState.hovered.material && threeState.hovered.material.emissive) {
+        threeState.hovered.material.emissive.setHex(0x000000);
+      }
+      if (object && object.material && object.material.emissive) {
+        object.material.emissive.setHex(0x123039);
+        threeState.hovered = object;
+        cursorReadout.textContent = `X ${format(hit.point.x)}, Y ${format(hit.point.y)}, Z ${format(hit.point.z)}`;
+      } else {
+        threeState.hovered = null;
+      }
+    }
+
+    function drawBackground(w, h) {
+      ctx.save();
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, w, h);
+      if (state.grid) {
+        const step = Math.max(8, state.snapSize * state.zoom);
+        const ox = state.pan.x % step;
+        const oy = state.pan.y % step;
+        ctx.strokeStyle = "rgba(80, 100, 120, 0.12)";
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = ox; x <= w; x += step) {
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, h);
+        }
+        for (let y = oy; y <= h; y += step) {
+          ctx.moveTo(0, y);
+          ctx.lineTo(w, y);
+        }
+        ctx.stroke();
+      }
+      const origin = toScreen({ x: 0, y: 0 });
+      ctx.strokeStyle = "rgba(215, 25, 32, 0.45)";
+      ctx.beginPath();
+      ctx.moveTo(0, origin.y);
+      ctx.lineTo(w, origin.y);
+      ctx.stroke();
+      ctx.strokeStyle = "rgba(8, 125, 131, 0.55)";
+      ctx.beginPath();
+      ctx.moveTo(origin.x, 0);
+      ctx.lineTo(origin.x, h);
+      ctx.stroke();
+      ctx.restore();
+    }
+
+    function drawSketch() {
+      state.entities.forEach(entity => drawEntity(entity, state.selected.includes(entity.id)));
+      state.dimensions.forEach(drawDimension);
+      state.features.filter(f => f.type === "plane" || f.type === "axis").forEach(drawReference);
+    }
+
+    function drawModel(w, h) {
+      drawSketch();
+      const profiles = closedEntities();
+      const depth = Number(state.depth || 40);
+      profiles.forEach((entity, index) => drawExtrudedEntity(entity, depth + index * 8, index));
+      state.features.forEach((feature, index) => drawFeatureGlyph(feature, index, w, h));
+      drawAppearanceEffects(w, h);
+    }
+
+    function drawAppearanceEffects(w, h) {
+      if (state.appearance === "stress") {
+        const bounds = overallBounds();
+        if (!bounds) return;
+        const p1 = toScreen({ x: bounds.x, y: bounds.y + bounds.h });
+        const p2 = toScreen({ x: bounds.x + bounds.w, y: bounds.y });
+        const gradient = ctx.createLinearGradient(p1.x, p1.y, p2.x, p2.y);
+        gradient.addColorStop(0, "rgba(47, 125, 70, 0.18)");
+        gradient.addColorStop(0.5, "rgba(182, 107, 0, 0.18)");
+        gradient.addColorStop(1, "rgba(215, 25, 32, 0.24)");
+        ctx.fillStyle = gradient;
+        ctx.fillRect(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y), Math.abs(p2.x - p1.x), Math.abs(p2.y - p1.y));
+      }
+      if (state.appearance === "flow") {
+        ctx.save();
+        ctx.strokeStyle = "#087d83";
+        ctx.fillStyle = "#087d83";
+        ctx.lineWidth = 1.6;
+        for (let y = 90; y < h - 80; y += 42) {
+          ctx.beginPath();
+          ctx.moveTo(70, y);
+          ctx.bezierCurveTo(w * 0.36, y - 28, w * 0.56, y + 28, w - 86, y);
+          ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(w - 86, y);
+          ctx.lineTo(w - 100, y - 6);
+          ctx.lineTo(w - 100, y + 6);
+          ctx.closePath();
+          ctx.fill();
+        }
+        ctx.restore();
+      }
+      if (state.appearance === "visualize" || state.reports.some(report => report.name === "Zebra Stripes")) {
+        ctx.save();
+        ctx.strokeStyle = state.appearance === "visualize" ? "rgba(215,25,32,0.18)" : "rgba(24,33,43,0.18)";
+        ctx.lineWidth = 8;
+        for (let x = -h; x < w + h; x += 42) {
+          ctx.beginPath();
+          ctx.moveTo(x, h);
+          ctx.lineTo(x + h, 0);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+    }
+
+    function drawAssembly(w, h) {
+      if (!state.components.length) {
+        drawModel(w, h);
+        return;
+      }
+      state.components.forEach(component => {
+        const p = toScreen(component);
+        const selected = state.selectedComponents.includes(component.id);
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate((component.angle || 0) * Math.PI / 180);
+        ctx.fillStyle = selected ? "rgba(8,125,131,0.17)" : "rgba(246,248,250,0.95)";
+        ctx.strokeStyle = selected ? "#087d83" : "#526678";
+        ctx.lineWidth = selected ? 2.4 : 1.4;
+        ctx.fillRect(-component.w * state.zoom / 2, -component.h * state.zoom / 2, component.w * state.zoom, component.h * state.zoom);
+        ctx.strokeRect(-component.w * state.zoom / 2, -component.h * state.zoom / 2, component.w * state.zoom, component.h * state.zoom);
+        ctx.fillStyle = "#263747";
+        ctx.font = "12px Segoe UI, Arial";
+        ctx.fillText(component.name, -component.w * state.zoom / 2 + 8, -component.h * state.zoom / 2 + 18);
+        ctx.restore();
+      });
+      state.mates.forEach((mate, index) => {
+        const a = state.components.find(c => c.id === mate.components[0]);
+        const b = state.components.find(c => c.id === mate.components[1]);
+        if (!a || !b) return;
+        const pa = toScreen(a);
+        const pb = toScreen(b);
+        ctx.strokeStyle = index % 2 ? "#b66b00" : "#087d83";
+        ctx.setLineDash([6, 5]);
+        ctx.beginPath();
+        ctx.moveTo(pa.x, pa.y);
+        ctx.lineTo(pb.x, pb.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#d5dee6";
+        const mx = (pa.x + pb.x) / 2;
+        const my = (pa.y + pb.y) / 2;
+        ctx.fillRect(mx - 34, my - 12, 68, 22);
+        ctx.strokeRect(mx - 34, my - 12, 68, 22);
+        ctx.fillStyle = "#263747";
+        ctx.font = "11px Segoe UI, Arial";
+        ctx.fillText(mate.type, mx - 27, my + 4);
+      });
+    }
+
+    function drawDrawing(w, h) {
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(30, 28, w - 60, h - 56);
+      ctx.strokeStyle = "#2b3a48";
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(30, 28, w - 60, h - 56);
+      ctx.strokeRect(w - 265, h - 118, 220, 74);
+      ctx.font = "12px Segoe UI, Arial";
+      ctx.fillStyle = "#263747";
+      ctx.fillText(state.name, w - 252, h - 92);
+      ctx.fillText("Scale 1:2", w - 252, h - 70);
+      const views = state.drawing.views.length ? state.drawing.views : defaultViews(w, h);
+      views.forEach(view => {
+        ctx.strokeStyle = "#526678";
+        ctx.fillStyle = "rgba(8, 125, 131, 0.08)";
+        ctx.fillRect(view.x, view.y, view.w, view.h);
+        ctx.strokeRect(view.x, view.y, view.w, view.h);
+        ctx.fillStyle = "#263747";
+        ctx.fillText(view.name, view.x + 8, view.y + 18);
+        drawMiniGeometry(view.x + view.w / 2, view.y + view.h / 2, Math.min(view.w, view.h) / 3);
+      });
+      state.drawing.annotations.forEach((note, index) => {
+        ctx.fillStyle = "#d71920";
+        ctx.beginPath();
+        ctx.arc(74 + index * 34, 78, 11, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = "#fff";
+        ctx.fillText(String(index + 1), 70 + index * 34, 82);
+      });
+      state.drawing.tables.forEach((table, index) => {
+        drawTable(58, h - 210 - index * 95, table);
+      });
+      ctx.restore();
+    }
+
+    function drawEvaluate(w, h) {
+      drawModel(w, h);
+      drawEvaluatePanel(w, h);
+    }
+
+    function drawEvaluatePanel(w, h) {
+      const metrics = computeMetrics();
+      const rows = [
+        ["Area", format(metrics.area)],
+        ["Perimeter", format(metrics.perimeter)],
+        ["Volume", format(metrics.volume)],
+        ["Mass", format(metrics.mass)],
+        ["Entities", state.entities.length],
+        ["Features", state.features.length]
+      ];
+      ctx.save();
+      ctx.fillStyle = "rgba(255,255,255,0.93)";
+      ctx.strokeStyle = "#d5dee6";
+      ctx.fillRect(w - 260, 26, 224, 206);
+      ctx.strokeRect(w - 260, 26, 224, 206);
+      ctx.fillStyle = "#18212b";
+      ctx.font = "700 14px Segoe UI, Arial";
+      ctx.fillText("Evaluate", w - 240, 52);
+      ctx.font = "12px Segoe UI, Arial";
+      rows.forEach((row, index) => {
+        const y = 82 + index * 24;
+        ctx.fillStyle = "#647280";
+        ctx.fillText(row[0], w - 240, y);
+        ctx.fillStyle = "#18212b";
+        ctx.fillText(String(row[1]), w - 130, y);
+      });
+      const barMax = Math.max(metrics.area, metrics.perimeter, metrics.volume, 1);
+      rows.slice(0, 3).forEach((row, index) => {
+        const value = Number(row[1]) || 0;
+        ctx.fillStyle = ["#d71920", "#087d83", "#2f7d46"][index];
+        ctx.fillRect(w - 240, 176 + index * 14, Math.max(6, 160 * value / barMax), 8);
+      });
+      ctx.restore();
+    }
+
+    function drawEntity(entity, selected = false) {
+      ctx.save();
+      ctx.lineWidth = selected ? 2.5 : 1.7;
+      ctx.strokeStyle = selected ? "#d71920" : entity.type === "centerline" ? "#647280" : "#263747";
+      ctx.fillStyle = selected ? "rgba(215,25,32,0.08)" : "rgba(8,125,131,0.06)";
+      if (entity.fixed) ctx.strokeStyle = "#2f7d46";
+      if (entity.type === "centerline") ctx.setLineDash([8, 5]);
+
+      if (entity.type === "line" || entity.type === "centerline") {
+        const a = toScreen({ x: entity.x1, y: entity.y1 });
+        const b = toScreen({ x: entity.x2, y: entity.y2 });
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+        ctx.stroke();
+      } else if (entity.type === "rect") {
+        const p = toScreen({ x: entity.x, y: entity.y });
+        const w = entity.w * state.zoom;
+        const h = -entity.h * state.zoom;
+        ctx.fillRect(p.x, p.y, w, h);
+        ctx.strokeRect(p.x, p.y, w, h);
+        if (entity.fillet || entity.chamfer) drawModifierLabel(entity, entity.fillet ? "R" : "C");
+      } else if (entity.type === "circle") {
+        const p = toScreen(entity);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.abs(entity.r * state.zoom), 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else if (entity.type === "arc") {
+        const p = toScreen(entity);
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, Math.abs(entity.r * state.zoom), entity.start, entity.end);
+        ctx.stroke();
+      } else if (entity.type === "polygon") {
+        const points = polygonPoints(entity);
+        drawPath(points, true, true);
+      } else if (entity.type === "slot") {
+        drawSlot(entity, selected);
+      } else if (entity.type === "point") {
+        const p = toScreen(entity);
+        ctx.fillStyle = selected ? "#d71920" : "#087d83";
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (entity.type === "text") {
+        const p = toScreen(entity);
+        ctx.fillStyle = selected ? "#d71920" : "#263747";
+        ctx.font = `${Math.max(10, entity.size || 18)}px Segoe UI, Arial`;
+        ctx.fillText(entity.text, p.x, p.y);
+      } else if (entity.type === "spline") {
+        if (entity.points.length > 1) {
+          ctx.beginPath();
+          entity.points.forEach((point, index) => {
+            const p = toScreen(point);
+            if (!index) ctx.moveTo(p.x, p.y);
+            else ctx.lineTo(p.x, p.y);
+          });
+          ctx.stroke();
+        }
+        entity.points.forEach(point => {
+          const p = toScreen(point);
+          ctx.fillStyle = "#087d83";
+          ctx.fillRect(p.x - 2, p.y - 2, 4, 4);
+        });
+      }
+      ctx.restore();
+    }
+
+    function drawPath(points, close, fill) {
+      if (!points.length) return;
+      ctx.beginPath();
+      points.forEach((point, index) => {
+        const p = toScreen(point);
+        if (!index) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      if (close) ctx.closePath();
+      if (fill) ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawSlot(entity) {
+      const a = toScreen({ x: entity.x1, y: entity.y1 });
+      const b = toScreen({ x: entity.x2, y: entity.y2 });
+      const r = Math.abs(entity.r * state.zoom);
+      const angle = Math.atan2(b.y - a.y, b.x - a.x);
+      const nx = Math.cos(angle + Math.PI / 2) * r;
+      const ny = Math.sin(angle + Math.PI / 2) * r;
+      ctx.beginPath();
+      ctx.moveTo(a.x + nx, a.y + ny);
+      ctx.lineTo(b.x + nx, b.y + ny);
+      ctx.arc(b.x, b.y, r, angle + Math.PI / 2, angle - Math.PI / 2);
+      ctx.lineTo(a.x - nx, a.y - ny);
+      ctx.arc(a.x, a.y, r, angle - Math.PI / 2, angle + Math.PI / 2);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawModifierLabel(entity, label) {
+      const center = entityCenter(entity);
+      const p = toScreen(center);
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#d5dee6";
+      ctx.fillRect(p.x - 12, p.y - 12, 24, 22);
+      ctx.strokeRect(p.x - 12, p.y - 12, 24, 22);
+      ctx.fillStyle = "#d71920";
+      ctx.font = "700 12px Segoe UI, Arial";
+      ctx.fillText(label, p.x - 4, p.y + 4);
+    }
+
+    function drawDimension(dim) {
+      const entity = state.entities.find(item => item.id === dim.entityId);
+      if (!entity) return;
+      const c = entityCenter(entity);
+      const p = toScreen({ x: c.x + 12, y: c.y + 12 });
+      ctx.save();
+      ctx.strokeStyle = "#b66b00";
+      ctx.fillStyle = "#fff";
+      ctx.lineWidth = 1.2;
+      ctx.fillRect(p.x - 38, p.y - 12, 76, 22);
+      ctx.strokeRect(p.x - 38, p.y - 12, 76, 22);
+      ctx.fillStyle = "#4a3520";
+      ctx.font = "11px Segoe UI, Arial";
+      ctx.fillText(dim.label, p.x - 31, p.y + 3);
+      ctx.restore();
+    }
+
+    function drawReference(feature) {
+      ctx.save();
+      ctx.strokeStyle = feature.type === "axis" ? "#087d83" : "#d71920";
+      ctx.setLineDash([7, 5]);
+      ctx.lineWidth = 1.4;
+      const c = toScreen({ x: 0, y: 0 });
+      if (feature.type === "axis") {
+        ctx.beginPath();
+        ctx.moveTo(c.x - 240, c.y - 120);
+        ctx.lineTo(c.x + 240, c.y + 120);
+        ctx.stroke();
+      } else {
+        ctx.strokeRect(c.x - 150, c.y - 90, 300, 180);
+      }
+      ctx.restore();
+    }
+
+    function drawPreview() {
+      if (transient.preview) drawEntity(transient.preview, true);
+      if (transient.splinePoints.length) {
+        drawEntity({ type: "spline", points: transient.splinePoints }, true);
+      }
+    }
+
+    function drawExtrudedEntity(entity, depth, index) {
+      const off = Math.max(12, depth * 0.36) * state.zoom;
+      ctx.save();
+      ctx.globalAlpha = 0.92;
+      const color = index % 3 === 0 ? "#dff3f4" : index % 3 === 1 ? "#f7e9e9" : "#edf2f5";
+      if (entity.type === "rect") {
+        const p1 = toScreen({ x: entity.x, y: entity.y });
+        const p2 = toScreen({ x: entity.x + entity.w, y: entity.y + entity.h });
+        drawExtrudedBox(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y), Math.abs(p2.x - p1.x), Math.abs(p2.y - p1.y), off, color);
+      } else if (entity.type === "circle") {
+        const p = toScreen(entity);
+        const r = Math.abs(entity.r * state.zoom);
+        drawExtrudedCylinder(p.x, p.y, r, off, color);
+      } else if (entity.type === "polygon" || entity.type === "slot") {
+        const b = boundsOf(entity);
+        const p1 = toScreen({ x: b.x, y: b.y });
+        const p2 = toScreen({ x: b.x + b.w, y: b.y + b.h });
+        drawExtrudedBox(Math.min(p1.x, p2.x), Math.min(p1.y, p2.y), Math.abs(p2.x - p1.x), Math.abs(p2.y - p1.y), off, color);
+      }
+      ctx.restore();
+    }
+
+    function drawExtrudedBox(x, y, w, h, off, color) {
+      ctx.fillStyle = "rgba(24,33,43,0.08)";
+      ctx.fillRect(x + off * 0.3, y + off * 0.45, w, h);
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#526678";
+      ctx.lineWidth = 1.3;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x + off, y - off * 0.55);
+      ctx.lineTo(x + off + w, y - off * 0.55);
+      ctx.lineTo(x + w, y);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x + w, y);
+      ctx.lineTo(x + off + w, y - off * 0.55);
+      ctx.lineTo(x + off + w, y - off * 0.55 + h);
+      ctx.lineTo(x + w, y + h);
+      ctx.closePath();
+      ctx.fillStyle = "#e7eef4";
+      ctx.fill();
+      ctx.stroke();
+      ctx.fillStyle = "#f9fbfc";
+      ctx.fillRect(x, y, w, h);
+      ctx.strokeRect(x, y, w, h);
+    }
+
+    function drawExtrudedCylinder(x, y, r, off, color) {
+      ctx.fillStyle = color;
+      ctx.strokeStyle = "#526678";
+      ctx.lineWidth = 1.4;
+      ctx.beginPath();
+      ctx.ellipse(x + off, y - off * 0.5, r, r * 0.56, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(x - r, y);
+      ctx.lineTo(x + off - r, y - off * 0.5);
+      ctx.moveTo(x + r, y);
+      ctx.lineTo(x + off + r, y - off * 0.5);
+      ctx.stroke();
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.ellipse(x, y, r, r * 0.56, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.stroke();
+    }
+
+    function drawFeatureGlyph(feature, index, w, h) {
+      const x = 18;
+      const y = h - 32 - index * 25;
+      if (y < 50) return;
+      ctx.save();
+      ctx.fillStyle = feature.type === "cut" ? "#d71920" : feature.type === "surface" ? "#087d83" : "#2f7d46";
+      ctx.fillRect(x, y, 9, 9);
+      ctx.fillStyle = "#263747";
+      ctx.font = "11px Segoe UI, Arial";
+      ctx.fillText(feature.name, x + 16, y + 9);
+      ctx.restore();
+    }
+
+    function drawMiniGeometry(cx, cy, size) {
+      ctx.save();
+      ctx.strokeStyle = "#087d83";
+      ctx.fillStyle = "rgba(8,125,131,0.08)";
+      if (closedEntities().some(e => e.type === "circle")) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, size * 0.55, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+      } else {
+        ctx.fillRect(cx - size, cy - size * 0.55, size * 2, size * 1.1);
+        ctx.strokeRect(cx - size, cy - size * 0.55, size * 2, size * 1.1);
+      }
+      ctx.restore();
+    }
+
+    function drawTable(x, y, table) {
+      ctx.save();
+      ctx.fillStyle = "#fff";
+      ctx.strokeStyle = "#526678";
+      ctx.fillRect(x, y, 220, 76);
+      ctx.strokeRect(x, y, 220, 76);
+      ctx.font = "11px Segoe UI, Arial";
+      ctx.fillStyle = "#18212b";
+      ctx.fillText(table.name, x + 8, y + 18);
+      table.rows.slice(0, 3).forEach((row, index) => {
+        ctx.fillText(row.join("  "), x + 8, y + 38 + index * 14);
+      });
+      ctx.restore();
+    }
+
+    function toScreen(point) {
+      return {
+        x: state.pan.x + point.x * state.zoom,
+        y: state.pan.y - point.y * state.zoom
+      };
+    }
+
+    function fromScreen(x, y) {
+      let point = {
+        x: (x - state.pan.x) / state.zoom,
+        y: (state.pan.y - y) / state.zoom
+      };
+      if (state.snap) {
+        point.x = Math.round(point.x / state.snapSize) * state.snapSize;
+        point.y = Math.round(point.y / state.snapSize) * state.snapSize;
+      }
+      return point;
+    }
+
+    function canvasPoint(event) {
+      const rect = canvas.getBoundingClientRect();
+      return fromScreen(event.clientX - rect.left, event.clientY - rect.top);
+    }
+
+    function rawCanvasPoint(event) {
+      const rect = canvas.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+
+    function addEntity(entity) {
+      snapshot();
+      const created = { id: id("sk"), name: defaultName(entity.type), ...entity };
+      state.entities.push(created);
+      state.selected = [created.id];
+      state.activeTab = "Sketch";
+      state.workspace = "sketch";
+      state.dirty = true;
+      statusMessage.textContent = `${created.name} created`;
+      renderAll();
+    }
+
+    function defaultName(type) {
+      const count = state.entities.filter(entity => entity.type === type).length + 1;
+      return `${toolName(type)}${count}`;
+    }
+
+    function pointerDown(event) {
+      if (isThreeWorkspace() && initThree()) {
+        handleThreePointerDown(event);
+        return;
+      }
+      const p = canvasPoint(event);
+      const raw = rawCanvasPoint(event);
+      cursorReadout.textContent = `X ${format(p.x)}, Y ${format(p.y)}`;
+      if (event.button === 1 || event.altKey) {
+        transient.dragId = "__pan";
+        transient.dragLast = raw;
+        return;
+      }
+      if (state.workspace === "assembly" || state.tool === "assemblyMove") {
+        handleAssemblyDown(p, event);
+        return;
+      }
+      if (state.tool === "select") {
+        const hit = hitTest(p);
+        state.selected = hit ? [hit.id] : [];
+        transient.dragId = hit ? hit.id : null;
+        transient.dragLast = p;
+        transient.dragSnapshot = hit ? JSON.stringify(cleanState()) : null;
+        transient.dragMoved = false;
+        renderAll();
+        return;
+      }
+      if (state.tool === "trim") {
+        const hit = hitTest(p);
+        if (hit) {
+          snapshot();
+          state.entities = state.entities.filter(entity => entity.id !== hit.id);
+          state.selected = [];
+          notify("Entity trimmed");
+          renderAll();
+        }
+        return;
+      }
+      if (state.tool === "dimension") {
+        const hit = hitTest(p);
+        if (hit) addDimension(hit);
+        return;
+      }
+      if (state.tool === "point") {
+        addEntity({ type: "point", x: p.x, y: p.y });
+        return;
+      }
+      if (state.tool === "text") {
+        const text = prompt("Sketch text", "TEXT");
+        if (text) addEntity({ type: "text", x: p.x, y: p.y, text, size: 18 });
+        return;
+      }
+      if (state.tool === "arc") {
+        handleArcClick(p);
+        return;
+      }
+      if (state.tool === "spline") {
+        transient.splinePoints.push(p);
+        transient.drawing = true;
+        render();
+        return;
+      }
+      transient.drawing = true;
+      transient.start = p;
+      transient.preview = null;
+    }
+
+    function pointerMove(event) {
+      if (isThreeWorkspace() && initThree()) {
+        updateThreeHover(event);
+        return;
+      }
+      const p = canvasPoint(event);
+      const raw = rawCanvasPoint(event);
+      cursorReadout.textContent = `X ${format(p.x)}, Y ${format(p.y)}`;
+      if (transient.dragId === "__pan") {
+        state.pan.x += raw.x - transient.dragLast.x;
+        state.pan.y += raw.y - transient.dragLast.y;
+        transient.dragLast = raw;
+        render();
+        return;
+      }
+      if (transient.dragId && state.tool === "assemblyMove") {
+        const component = state.components.find(item => item.id === transient.dragId);
+        if (component) {
+          component.x = p.x;
+          component.y = p.y;
+          transient.dragMoved = true;
+          render();
+        }
+        return;
+      }
+      if (transient.dragId && state.tool === "select") {
+        const entity = state.entities.find(item => item.id === transient.dragId);
+        if (entity && transient.dragLast) {
+          translateEntity(entity, p.x - transient.dragLast.x, p.y - transient.dragLast.y);
+          transient.dragLast = p;
+          transient.dragMoved = true;
+          render();
+        }
+        return;
+      }
+      if (!transient.drawing || !transient.start) return;
+      transient.preview = previewEntity(state.tool, transient.start, p);
+      render();
+    }
+
+    function pointerUp(event) {
+      if (isThreeWorkspace() && initThree()) return;
+      if (transient.dragId === "__pan") {
+        transient.dragId = null;
+        return;
+      }
+      if (transient.dragId && state.tool === "assemblyMove") {
+        commitDragHistory();
+        transient.dragId = null;
+        renderAll();
+        return;
+      }
+      if (transient.dragId && state.tool === "select") {
+        commitDragHistory();
+        transient.dragId = null;
+        transient.dragLast = null;
+        renderAll();
+        return;
+      }
+      if (!transient.drawing || !transient.preview) return;
+      if (isValidEntity(transient.preview)) addEntity(transient.preview);
+      transient.drawing = false;
+      transient.start = null;
+      transient.preview = null;
+    }
+
+    function pointerDoubleClick() {
+      if (state.tool === "spline" && transient.splinePoints.length > 1) {
+        addEntity({ type: "spline", points: transient.splinePoints.slice() });
+        transient.splinePoints = [];
+        transient.drawing = false;
+      }
+    }
+
+    function previewEntity(tool, start, end) {
+      if (tool === "line" || tool === "centerline") return { type: tool, x1: start.x, y1: start.y, x2: end.x, y2: end.y };
+      if (tool === "rect") return { type: "rect", x: start.x, y: start.y, w: end.x - start.x, h: end.y - start.y };
+      if (tool === "circle") return { type: "circle", x: start.x, y: start.y, r: dist(start, end) };
+      if (tool === "polygon") return { type: "polygon", x: start.x, y: start.y, r: dist(start, end), sides: Number(state.polygonSides || 6) };
+      if (tool === "slot") return { type: "slot", x1: start.x, y1: start.y, x2: end.x, y2: end.y, r: Math.max(5, dist(start, end) * 0.18) };
+      return null;
+    }
+
+    function handleArcClick(p) {
+      if (transient.arcStep === 0) {
+        transient.arcData = { x: p.x, y: p.y };
+        transient.arcStep = 1;
+        notify("Arc center set");
+      } else if (transient.arcStep === 1) {
+        transient.arcData.r = dist(transient.arcData, p);
+        transient.arcData.start = Math.atan2(transient.arcData.y - p.y, p.x - transient.arcData.x);
+        transient.arcStep = 2;
+        notify("Arc start set");
+      } else {
+        const end = Math.atan2(transient.arcData.y - p.y, p.x - transient.arcData.x);
+        addEntity({ type: "arc", ...transient.arcData, end });
+        transient.arcStep = 0;
+        transient.arcData = null;
+      }
+    }
+
+    function isValidEntity(entity) {
+      if (!entity) return false;
+      if (entity.type === "line" || entity.type === "centerline") return dist({ x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 }) > 1;
+      if (entity.type === "rect") return Math.abs(entity.w) > 1 && Math.abs(entity.h) > 1;
+      if (entity.type === "circle" || entity.type === "polygon") return Math.abs(entity.r) > 1;
+      if (entity.type === "slot") return dist({ x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 }) > 1;
+      return true;
+    }
+
+    function hitTest(point) {
+      const tolerance = 8 / state.zoom;
+      for (let i = state.entities.length - 1; i >= 0; i--) {
+        const entity = state.entities[i];
+        if (entityHit(entity, point, tolerance)) return entity;
+      }
+      return null;
+    }
+
+    function entityHit(entity, point, tolerance) {
+      if (entity.type === "line" || entity.type === "centerline") return pointToSegment(point, { x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 }) <= tolerance;
+      if (entity.type === "rect") {
+        const b = boundsOf(entity);
+        return point.x >= b.x - tolerance && point.x <= b.x + b.w + tolerance && point.y >= b.y - tolerance && point.y <= b.y + b.h + tolerance;
+      }
+      if (entity.type === "circle") return Math.abs(dist(entity, point) - Math.abs(entity.r)) <= tolerance || dist(entity, point) < Math.abs(entity.r);
+      if (entity.type === "polygon") return pointInPolygon(point, polygonPoints(entity));
+      if (entity.type === "slot") return pointToSegment(point, { x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 }) <= Math.abs(entity.r) + tolerance;
+      if (entity.type === "point") return dist(entity, point) <= tolerance * 1.5;
+      if (entity.type === "text") return Math.abs(point.x - entity.x) < 60 / state.zoom && Math.abs(point.y - entity.y) < 24 / state.zoom;
+      if (entity.type === "spline") return entity.points.some((p, i, arr) => i && pointToSegment(point, arr[i - 1], p) <= tolerance);
+      if (entity.type === "arc") return Math.abs(dist(entity, point) - Math.abs(entity.r)) <= tolerance;
+      return false;
+    }
+
+    function translateEntity(entity, dx, dy) {
+      if (entity.fixed) return;
+      if (["line", "centerline", "slot"].includes(entity.type)) {
+        entity.x1 += dx;
+        entity.y1 += dy;
+        entity.x2 += dx;
+        entity.y2 += dy;
+      } else if (entity.type === "spline") {
+        entity.points.forEach(point => {
+          point.x += dx;
+          point.y += dy;
+        });
+      } else {
+        entity.x += dx;
+        entity.y += dy;
+      }
+    }
+
+    function polygonPoints(entity) {
+      const sides = Math.max(3, Math.min(40, Number(entity.sides || 6)));
+      const points = [];
+      for (let i = 0; i < sides; i++) {
+        const angle = -Math.PI / 2 + (Math.PI * 2 * i) / sides;
+        points.push({ x: entity.x + Math.cos(angle) * entity.r, y: entity.y + Math.sin(angle) * entity.r });
+      }
+      return points;
+    }
+
+    function entityCenter(entity) {
+      const b = boundsOf(entity);
+      return { x: b.x + b.w / 2, y: b.y + b.h / 2 };
+    }
+
+    function boundsOf(entity) {
+      if (entity.type === "line" || entity.type === "centerline") {
+        const x = Math.min(entity.x1, entity.x2);
+        const y = Math.min(entity.y1, entity.y2);
+        return { x, y, w: Math.abs(entity.x2 - entity.x1), h: Math.abs(entity.y2 - entity.y1) };
+      }
+      if (entity.type === "rect") {
+        const x = Math.min(entity.x, entity.x + entity.w);
+        const y = Math.min(entity.y, entity.y + entity.h);
+        return { x, y, w: Math.abs(entity.w), h: Math.abs(entity.h) };
+      }
+      if (entity.type === "circle" || entity.type === "arc" || entity.type === "polygon") {
+        return { x: entity.x - Math.abs(entity.r), y: entity.y - Math.abs(entity.r), w: Math.abs(entity.r) * 2, h: Math.abs(entity.r) * 2 };
+      }
+      if (entity.type === "slot") {
+        const x = Math.min(entity.x1, entity.x2) - entity.r;
+        const y = Math.min(entity.y1, entity.y2) - entity.r;
+        return { x, y, w: Math.abs(entity.x2 - entity.x1) + entity.r * 2, h: Math.abs(entity.y2 - entity.y1) + entity.r * 2 };
+      }
+      if (entity.type === "spline") {
+        const xs = entity.points.map(point => point.x);
+        const ys = entity.points.map(point => point.y);
+        return { x: Math.min(...xs), y: Math.min(...ys), w: Math.max(...xs) - Math.min(...xs), h: Math.max(...ys) - Math.min(...ys) };
+      }
+      return { x: entity.x || 0, y: entity.y || 0, w: 1, h: 1 };
+    }
+
+    function closedEntities() {
+      return state.entities.filter(entity => ["rect", "circle", "polygon", "slot"].includes(entity.type));
+    }
+
+    function addFeature(type, name, params = {}) {
+      const sources = state.selected.length ? state.selected.slice() : closedEntities().map(entity => entity.id);
+      if (!sources.length && !["plane", "axis", "weldment", "mold", "routing", "cam", "electrical"].includes(type)) {
+        notify("Create or select a closed sketch profile first");
+        state.activeTab = "Sketch";
+        state.workspace = "sketch";
+        renderAll();
+        return;
+      }
+      snapshot();
+      state.features.push({
+        id: id("ft"),
+        type,
+        name,
+        sources,
+        depth: Number(state.depth || 40),
+        amount: Number(state.amount || 5),
+        params,
+        createdAt: new Date().toISOString()
+      });
+      state.workspace = "model";
+      state.dirty = true;
+      notify(`${name} added`);
+      renderAll();
+    }
+
+    function modifySelected(prop, name) {
+      if (!state.selected.length) return addFeature(prop, name);
+      snapshot();
+      state.selected.forEach(selectedId => {
+        const entity = state.entities.find(item => item.id === selectedId);
+        if (entity) entity[prop] = Number(state.amount || 5);
+      });
+      addFeature(prop, name);
+    }
+
+    function addReference(type) {
+      snapshot();
+      state.features.push({ id: id("rf"), type, name: type === "axis" ? "Reference Axis" : "Reference Plane", sources: [], depth: 0 });
+      notify(`${type === "axis" ? "Axis" : "Plane"} added`);
+      renderAll();
+    }
+
+    function holeWizard() {
+      snapshot();
+      const target = state.selected.length ? state.entities.find(entity => entity.id === state.selected[0]) : closedEntities()[0];
+      const center = target ? entityCenter(target) : { x: 0, y: 0 };
+      const hole = { id: id("sk"), name: "Hole", type: "circle", x: center.x, y: center.y, r: Number(state.holeRadius || 8), cut: true };
+      state.entities.push(hole);
+      state.features.push({ id: id("ft"), type: "cut", name: "Hole Wizard", sources: [hole.id], depth: Number(state.depth || 40) });
+      state.selected = [hole.id];
+      state.workspace = "model";
+      notify("Hole Wizard placed a cut hole");
+      renderAll();
+    }
+
+    function sheetFeature(name, params = {}) {
+      if (!closedEntities().length) {
+        snapshot();
+        state.entities.push({ id: id("sk"), name: "Base Flange Sketch", type: "rect", x: -70, y: 40, w: 140, h: -80 });
+      }
+      addFeature("sheetmetal", name, params);
+    }
+
+    function structuralMember() {
+      snapshot();
+      const lines = [
+        { type: "line", x1: -90, y1: -55, x2: 90, y2: -55 },
+        { type: "line", x1: 90, y1: -55, x2: 90, y2: 55 },
+        { type: "line", x1: 90, y1: 55, x2: -90, y2: 55 },
+        { type: "line", x1: -90, y1: 55, x2: -90, y2: -55 }
+      ].map(line => ({ id: id("sk"), name: "Structural Path", ...line }));
+      state.entities.push(...lines);
+      state.features.push({ id: id("ft"), type: "weldment", name: "Structural Member", sources: lines.map(line => line.id), depth: 30 });
+      state.workspace = "model";
+      notify("Structural member frame added");
+      renderAll();
+    }
+
+    function ejectorPins() {
+      snapshot();
+      const pins = [
+        { x: -40, y: -25 },
+        { x: 40, y: -25 },
+        { x: -40, y: 25 },
+        { x: 40, y: 25 }
+      ].map(point => ({ id: id("sk"), name: "Ejector Pin", type: "circle", x: point.x, y: point.y, r: 5 }));
+      state.entities.push(...pins);
+      state.features.push({ id: id("ft"), type: "mold", name: "Ejector Pins", sources: pins.map(pin => pin.id), depth: 30 });
+      notify("Ejector pin pattern added");
+      renderAll();
+    }
+
+    function offsetSelected(amount) {
+      const selected = selectedEntities();
+      if (!selected.length) return notify("Select sketch geometry to offset");
+      snapshot();
+      selected.forEach(entity => {
+        const clone = cloneEntity(entity);
+        clone.id = id("sk");
+        clone.name = `${entity.name || entity.type} Offset`;
+        if (clone.type === "circle" || clone.type === "polygon") clone.r += amount;
+        else translateEntity(clone, amount, amount);
+        state.entities.push(clone);
+      });
+      notify("Offset entities created");
+      renderAll();
+    }
+
+    function mirrorSketch() {
+      const selected = selectedEntities();
+      if (!selected.length) return notify("Select sketch geometry to mirror");
+      snapshot();
+      selected.forEach(entity => {
+        const clone = cloneEntity(entity);
+        clone.id = id("sk");
+        clone.name = `${entity.name || entity.type} Mirror`;
+        mirrorEntityX(clone);
+        state.entities.push(clone);
+      });
+      notify("Mirrored about vertical origin axis");
+      renderAll();
+    }
+
+    function linearPattern() {
+      const selected = selectedEntities();
+      if (!selected.length) return notify("Select sketch geometry to pattern");
+      snapshot();
+      selected.forEach(entity => {
+        for (let i = 1; i <= 3; i++) {
+          const clone = cloneEntity(entity);
+          clone.id = id("sk");
+          clone.name = `${entity.name || entity.type} Pattern ${i}`;
+          translateEntity(clone, i * 35, 0);
+          state.entities.push(clone);
+        }
+      });
+      notify("Linear pattern created");
+      renderAll();
+    }
+
+    function circularPattern() {
+      const selected = selectedEntities();
+      if (!selected.length) return notify("Select sketch geometry to pattern");
+      snapshot();
+      selected.forEach(entity => {
+        for (let i = 1; i <= 5; i++) {
+          const clone = cloneEntity(entity);
+          clone.id = id("sk");
+          clone.name = `${entity.name || entity.type} Circular ${i}`;
+          rotateEntity(clone, (Math.PI * 2 * i) / 6);
+          state.entities.push(clone);
+        }
+      });
+      notify("Circular pattern created");
+      renderAll();
+    }
+
+    function applyRelation(relation) {
+      const selected = selectedEntities();
+      if (!selected.length) return notify(`Select geometry for ${relation}`);
+      snapshot();
+      selected.forEach(entity => {
+        entity.relations = [...(entity.relations || []), relation];
+        if (relation === "Fix") entity.fixed = true;
+        if (relation === "Horizontal" && (entity.type === "line" || entity.type === "centerline")) entity.y2 = entity.y1;
+        if (relation === "Vertical" && (entity.type === "line" || entity.type === "centerline")) entity.x2 = entity.x1;
+      });
+      notify(`${relation} relation applied`);
+      renderAll();
+    }
+
+    function repairSketch() {
+      snapshot();
+      state.entities = state.entities.filter(isValidEntity);
+      state.dimensions = state.dimensions.filter(dim => state.entities.some(entity => entity.id === dim.entityId));
+      notify("Sketch diagnostics repaired invalid entities");
+      renderAll();
+    }
+
+    function scaleSelected(factor) {
+      const selected = selectedEntities();
+      if (!selected.length) return notify("Select geometry to scale");
+      snapshot();
+      selected.forEach(entity => scaleEntity(entity, factor));
+      addFeature("scale", "Scale");
+    }
+
+    function insertComponent() {
+      snapshot();
+      const count = state.components.length;
+      const bounds = overallBounds() || { w: 120, h: 80 };
+      state.components.push({
+        id: id("cp"),
+        name: `Component-${count + 1}`,
+        x: -110 + count * 80,
+        y: count % 2 ? 45 : -35,
+        w: Math.max(70, Math.min(150, bounds.w || 120)),
+        h: Math.max(50, Math.min(110, bounds.h || 80)),
+        angle: 0,
+        sourceFeatures: state.features.map(f => f.id)
+      });
+      state.activeTab = "Assembly";
+      state.workspace = "assembly";
+      state.tool = "assemblyMove";
+      notify("Component inserted");
+      renderAll();
+    }
+
+    function handleAssemblyDown(point, event) {
+      const hit = componentHit(point);
+      if (hit) {
+        if (event.shiftKey && !state.selectedComponents.includes(hit.id)) state.selectedComponents.push(hit.id);
+        else state.selectedComponents = [hit.id];
+        transient.dragId = hit.id;
+        transient.dragSnapshot = JSON.stringify(cleanState());
+        transient.dragMoved = false;
+      } else {
+        state.selectedComponents = [];
+        transient.dragSnapshot = null;
+        transient.dragMoved = false;
+      }
+      renderAll();
+    }
+
+    function componentHit(point) {
+      for (let i = state.components.length - 1; i >= 0; i--) {
+        const c = state.components[i];
+        if (Math.abs(point.x - c.x) <= c.w / 2 && Math.abs(point.y - c.y) <= c.h / 2) return c;
+      }
+      return null;
+    }
+
+    function addMate(type) {
+      if (state.selectedComponents.length < 2) return notify("Select two components for a mate");
+      snapshot();
+      const [aId, bId] = state.selectedComponents;
+      const a = state.components.find(c => c.id === aId);
+      const b = state.components.find(c => c.id === bId);
+      if (a && b && type === "Coincident") {
+        b.x = a.x + a.w / 2 + b.w / 2;
+        b.y = a.y;
+      }
+      if (a && b && type === "Distance") {
+        b.x = a.x + 120;
+        b.y = a.y;
+      }
+      state.mates.push({ id: id("mt"), type, components: [aId, bId], value: type === "Distance" ? 120 : 0 });
+      notify(`${type} mate added`);
+      renderAll();
+    }
+
+    function explode() {
+      if (!state.components.length) return notify("Insert components first");
+      snapshot();
+      state.components.forEach((component, index) => {
+        component.x += (index - (state.components.length - 1) / 2) * 70;
+        component.y += index % 2 ? 40 : -40;
+      });
+      notify("Exploded view created");
+      renderAll();
+    }
+
+    function interference() {
+      let overlaps = 0;
+      for (let i = 0; i < state.components.length; i++) {
+        for (let j = i + 1; j < state.components.length; j++) {
+          if (componentsOverlap(state.components[i], state.components[j])) overlaps += 1;
+        }
+      }
+      addReport("Interference Detection", overlaps ? `${overlaps} overlap(s) found` : "No interferences");
+    }
+
+    function motionStudy() {
+      if (!state.components.length) insertComponent();
+      transient.motion = !transient.motion;
+      if (transient.motion) animateMotion();
+      addReport("Motion Study", transient.motion ? "Motion animation started" : "Motion animation stopped");
+    }
+
+    function animateMotion() {
+      if (!transient.motion) return;
+      state.components.forEach((component, index) => {
+        component.angle = ((component.angle || 0) + 1 + index) % 360;
+      });
+      render();
+      requestAnimationFrame(animateMotion);
+    }
+
+    function standardViews() {
+      snapshot();
+      state.drawing.views = defaultViews(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      state.activeTab = "Drawing";
+      state.workspace = "drawing";
+      notify("Standard 3 View generated");
+      renderAll();
+    }
+
+    function defaultViews(w, h) {
+      return [
+        { name: "Front", x: 72, y: 72, w: Math.min(230, w * 0.24), h: Math.min(150, h * 0.22) },
+        { name: "Top", x: 72, y: 250, w: Math.min(230, w * 0.24), h: Math.min(120, h * 0.18) },
+        { name: "Right", x: 345, y: 72, w: Math.min(190, w * 0.2), h: Math.min(150, h * 0.22) }
+      ];
+    }
+
+    function drawingOp(name) {
+      snapshot();
+      if (!state.drawing.views.length) state.drawing.views = defaultViews(canvasWrap.clientWidth, canvasWrap.clientHeight);
+      state.drawing.annotations.push({ id: id("an"), name });
+      state.activeTab = "Drawing";
+      state.workspace = "drawing";
+      notify(`${name} added to drawing`);
+      renderAll();
+    }
+
+    function addNote() {
+      const text = prompt("Drawing note", "CHECK DIMENSIONS BEFORE RELEASE");
+      if (!text) return;
+      snapshot();
+      state.drawing.annotations.push({ id: id("an"), name: "Note", text });
+      state.activeTab = "Drawing";
+      state.workspace = "drawing";
+      notify("Note added");
+      renderAll();
+    }
+
+    function bom() {
+      snapshot();
+      state.drawing.tables.push({
+        id: id("tb"),
+        name: "Bill of Materials",
+        rows: [
+          ["ITEM", "PART", "QTY"],
+          ["1", state.name, "1"],
+          ["2", "Fastener", String(Math.max(0, state.features.filter(f => f.name.includes("Hole")).length * 4))]
+        ]
+      });
+      state.activeTab = "Drawing";
+      state.workspace = "drawing";
+      notify("BOM table added");
+      renderAll();
+    }
+
+    function measure() {
+      const selected = selectedEntities()[0];
+      const text = selected ? `Selected ${selected.type}: ${format(entityLength(selected))} ${state.unit}` : `Total perimeter: ${format(computeMetrics().perimeter)} ${state.unit}`;
+      addReport("Measure", text);
+    }
+
+    function simulation() {
+      addReport("Simulation", `FEA proxy solved: max stress ${format(computeMetrics().mass * 0.18 + 12)} MPa`);
+      state.appearance = "stress";
+      renderAll();
+    }
+
+    function flow() {
+      addReport("Flow Simulation", "Velocity arrows rendered across the model envelope.");
+      state.appearance = "flow";
+      renderAll();
+    }
+
+    function visualize() {
+      state.appearance = state.appearance === "visualize" ? "shaded" : "visualize";
+      addReport("Visualize", "Photoreal material preview toggled.");
+      renderAll();
+    }
+
+    function toolbox() {
+      snapshot();
+      const points = [{ x: -50, y: -30 }, { x: 50, y: -30 }, { x: -50, y: 30 }, { x: 50, y: 30 }];
+      const fasteners = points.map(point => ({ id: id("sk"), name: "Toolbox Fastener", type: "circle", x: point.x, y: point.y, r: 4 }));
+      state.entities.push(...fasteners);
+      state.features.push({ id: id("ft"), type: "toolbox", name: "Toolbox Fasteners", sources: fasteners.map(f => f.id), depth: 12 });
+      notify("Toolbox fasteners inserted");
+      renderAll();
+    }
+
+    function contentCentral() {
+      snapshot();
+      state.components.push({ id: id("cp"), name: "Veltrix Parts Hub Component", x: 80, y: 60, w: 96, h: 66, angle: 0 });
+      state.activeTab = "Assembly";
+      state.workspace = "assembly";
+      notify("Supplier component inserted");
+      renderAll();
+    }
+
+    function cutList() {
+      const length = state.entities.filter(e => e.type === "line").reduce((sum, e) => sum + entityLength(e), 0);
+      addReport("Weldment Cut List", `${format(length)} ${state.unit} of structural members`);
+    }
+
+    function addReport(name, value) {
+      snapshot();
+      state.reports.push({ id: id("rp"), name, value: String(value), createdAt: new Date().toLocaleTimeString() });
+      if (state.activeTab === "Evaluate") state.workspace = "evaluate";
+      notify(name);
+      renderAll();
+    }
+
+    function addDimension(entity) {
+      snapshot();
+      const value = entityLength(entity);
+      const label = `${format(value)} ${state.unit}`;
+      state.dimensions.push({ id: id("dm"), entityId: entity.id, label });
+      notify("Smart Dimension added");
+      renderAll();
+    }
+
+    function selectedEntities() {
+      return state.entities.filter(entity => state.selected.includes(entity.id));
+    }
+
+    function cloneEntity(entity) {
+      return JSON.parse(JSON.stringify(entity));
+    }
+
+    function mirrorEntityX(entity) {
+      if (entity.type === "line" || entity.type === "centerline" || entity.type === "slot") {
+        entity.x1 *= -1;
+        entity.x2 *= -1;
+      } else if (entity.type === "spline") {
+        entity.points.forEach(point => point.x *= -1);
+      } else {
+        entity.x *= -1;
+      }
+    }
+
+    function rotateEntity(entity, angle) {
+      const rotatePoint = point => {
+        const x = point.x * Math.cos(angle) - point.y * Math.sin(angle);
+        const y = point.x * Math.sin(angle) + point.y * Math.cos(angle);
+        point.x = x;
+        point.y = y;
+      };
+      if (entity.type === "line" || entity.type === "centerline" || entity.type === "slot") {
+        const p1 = { x: entity.x1, y: entity.y1 };
+        const p2 = { x: entity.x2, y: entity.y2 };
+        rotatePoint(p1);
+        rotatePoint(p2);
+        entity.x1 = p1.x;
+        entity.y1 = p1.y;
+        entity.x2 = p2.x;
+        entity.y2 = p2.y;
+      } else if (entity.type === "spline") {
+        entity.points.forEach(rotatePoint);
+      } else {
+        rotatePoint(entity);
+      }
+    }
+
+    function commitDragHistory() {
+      if (transient.dragMoved && transient.dragSnapshot) {
+        state.history.push(transient.dragSnapshot);
+        if (state.history.length > 80) state.history.shift();
+        state.future = [];
+        state.dirty = true;
+        savedState.textContent = "Unsaved changes";
+      }
+      transient.dragSnapshot = null;
+      transient.dragMoved = false;
+    }
+
+    function scaleEntity(entity, factor) {
+      if (entity.type === "line" || entity.type === "centerline" || entity.type === "slot") {
+        entity.x1 *= factor;
+        entity.y1 *= factor;
+        entity.x2 *= factor;
+        entity.y2 *= factor;
+        if (entity.r) entity.r *= factor;
+      } else if (entity.type === "spline") {
+        entity.points.forEach(point => {
+          point.x *= factor;
+          point.y *= factor;
+        });
+      } else {
+        entity.x *= factor;
+        entity.y *= factor;
+        if (entity.r) entity.r *= factor;
+        if (entity.w) entity.w *= factor;
+        if (entity.h) entity.h *= factor;
+      }
+    }
+
+    function computeMetrics() {
+      const area = closedEntities().reduce((sum, entity) => sum + entityArea(entity), 0);
+      const perimeter = state.entities.reduce((sum, entity) => sum + entityLength(entity), 0);
+      const depth = Number(state.depth || 40);
+      const volume = area * Math.max(1, depth);
+      const mass = volume * 0.00000785;
+      return { area, perimeter, volume, mass };
+    }
+
+    function entityArea(entity) {
+      if (entity.type === "rect") return Math.abs(entity.w * entity.h);
+      if (entity.type === "circle") return Math.PI * entity.r * entity.r;
+      if (entity.type === "polygon") return polygonArea(polygonPoints(entity));
+      if (entity.type === "slot") {
+        const length = dist({ x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 });
+        return length * entity.r * 2 + Math.PI * entity.r * entity.r;
+      }
+      return 0;
+    }
+
+    function entityLength(entity) {
+      if (entity.type === "line" || entity.type === "centerline") return dist({ x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 });
+      if (entity.type === "rect") return Math.abs(entity.w) * 2 + Math.abs(entity.h) * 2;
+      if (entity.type === "circle") return Math.PI * Math.abs(entity.r) * 2;
+      if (entity.type === "arc") return Math.abs(entity.end - entity.start) * Math.abs(entity.r);
+      if (entity.type === "polygon") return polygonPerimeter(polygonPoints(entity));
+      if (entity.type === "slot") return dist({ x: entity.x1, y: entity.y1 }, { x: entity.x2, y: entity.y2 }) * 2 + Math.PI * entity.r * 2;
+      if (entity.type === "spline") return entity.points.reduce((sum, point, index, arr) => index ? sum + dist(arr[index - 1], point) : 0, 0);
+      return 0;
+    }
+
+    function massPropertiesText() {
+      const m = computeMetrics();
+      return `Volume ${format(m.volume)} ${state.unit}3, mass ${format(m.mass)} kg`;
+    }
+
+    function sectionPropertiesText() {
+      const m = computeMetrics();
+      return `Projected area ${format(m.area)} ${state.unit}2, perimeter ${format(m.perimeter)} ${state.unit}`;
+    }
+
+    function geometryAnalysisText() {
+      const invalid = state.entities.filter(entity => !isValidEntity(entity)).length;
+      return invalid ? `${invalid} invalid entities found` : "No invalid sketch entities found";
+    }
+
+    function symmetryText() {
+      const symmetric = closedEntities().some(entity => Math.abs(entityCenter(entity).x) < 0.01);
+      return symmetric ? "At least one profile is centered on the vertical origin axis" : "No closed profile centered on vertical origin axis";
+    }
+
+    function definitionStatus() {
+      if (!state.entities.length) return "No sketch";
+      if (state.entities.some(e => e.fixed || (e.relations && e.relations.length))) return "Fully defined";
+      if (state.dimensions.length) return "Partially defined";
+      return "Under-defined";
+    }
+
+    function newProject() {
+      if (state.dirty && !confirm("Start a new project and discard unsaved changes?")) return;
+      state = makeInitialState();
+      zoomFit();
+      notify("New project");
+      renderAll();
+    }
+
+    function saveLocal() {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanState()));
+      state.dirty = false;
+      savedState.textContent = "Saved in browser";
+      notify("Project saved in browser");
+    }
+
+    function loadLocal() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        restore(saved);
+        savedState.textContent = "Loaded browser save";
+      }
+    }
+
+    function downloadJson() {
+      download(`${safeName(state.name)}.json`, JSON.stringify(cleanState(), null, 2), "application/json");
+      notify("Project JSON downloaded");
+    }
+
+    function exportSvg() {
+      const svg = sketchToSvg();
+      download(`${safeName(state.name)}.svg`, svg, "image/svg+xml");
+      notify("SVG exported");
+    }
+
+    function exportDxf() {
+      download(`${safeName(state.name)}.dxf`, sketchToDxf(), "application/dxf");
+      notify("DXF exported");
+    }
+
+    function exportPng() {
+      const sourceCanvas = isThreeWorkspace() && threeState.ready ? threeState.renderer.domElement : canvas;
+      const url = sourceCanvas.toDataURL("image/png");
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${safeName(state.name)}.png`;
+      a.click();
+      notify("PNG exported");
+    }
+
+    function exportStl() {
+      if (!prepareThreeExport()) return;
+      const triangles = collectExportTriangles();
+      if (!triangles.length) return notify("No solid mesh to export");
+      const lines = [`solid ${safeName(state.name)}`];
+      triangles.forEach(([a, b, c]) => {
+        const normal = triangleNormal(a, b, c);
+        lines.push(`  facet normal ${normal.x} ${normal.y} ${normal.z}`);
+        lines.push("    outer loop");
+        [a, b, c].forEach(vertex => lines.push(`      vertex ${vertex.x} ${vertex.y} ${vertex.z}`));
+        lines.push("    endloop");
+        lines.push("  endfacet");
+      });
+      lines.push(`endsolid ${safeName(state.name)}`);
+      download(`${safeName(state.name)}.stl`, lines.join("\n"), "model/stl");
+      notify("STL exported");
+    }
+
+    function exportObj() {
+      if (!prepareThreeExport()) return;
+      const THREE = window.THREE;
+      const vertices = [];
+      const faces = [];
+      exportableMeshes().forEach(mesh => {
+        mesh.updateMatrixWorld(true);
+        const geometry = mesh.geometry;
+        const position = geometry.attributes.position;
+        const offset = vertices.length;
+        for (let i = 0; i < position.count; i++) {
+          vertices.push(new THREE.Vector3().fromBufferAttribute(position, i).applyMatrix4(mesh.matrixWorld));
+        }
+        if (geometry.index) {
+          for (let i = 0; i < geometry.index.count; i += 3) {
+            faces.push([geometry.index.getX(i) + 1 + offset, geometry.index.getX(i + 1) + 1 + offset, geometry.index.getX(i + 2) + 1 + offset]);
+          }
+        } else {
+          for (let i = 0; i < position.count; i += 3) faces.push([offset + i + 1, offset + i + 2, offset + i + 3]);
+        }
+      });
+      if (!faces.length) return notify("No solid mesh to export");
+      const lines = [`o ${safeName(state.name)}`];
+      vertices.forEach(vertex => lines.push(`v ${vertex.x} ${vertex.y} ${vertex.z}`));
+      faces.forEach(face => lines.push(`f ${face[0]} ${face[1]} ${face[2]}`));
+      download(`${safeName(state.name)}.obj`, lines.join("\n"), "model/obj");
+      notify("OBJ exported");
+    }
+
+    function prepareThreeExport() {
+      if (!initThree()) {
+        notify("Three.js is required for mesh export");
+        return false;
+      }
+      const originalWorkspace = state.workspace;
+      if (!isThreeWorkspace()) state.workspace = "model";
+      updateThreeScene();
+      state.workspace = originalWorkspace;
+      return true;
+    }
+
+    function exportableMeshes() {
+      const meshes = [];
+      if (!threeState.modelGroup) return meshes;
+      threeState.modelGroup.traverse(item => {
+        if (item.isMesh && item.userData && item.userData.exportable && item.geometry && item.geometry.attributes.position) meshes.push(item);
+      });
+      return meshes;
+    }
+
+    function collectExportTriangles() {
+      const THREE = window.THREE;
+      const triangles = [];
+      exportableMeshes().forEach(mesh => {
+        mesh.updateMatrixWorld(true);
+        const geometry = mesh.geometry;
+        const position = geometry.attributes.position;
+        const readVertex = index => new THREE.Vector3().fromBufferAttribute(position, index).applyMatrix4(mesh.matrixWorld);
+        if (geometry.index) {
+          for (let i = 0; i < geometry.index.count; i += 3) {
+            triangles.push([readVertex(geometry.index.getX(i)), readVertex(geometry.index.getX(i + 1)), readVertex(geometry.index.getX(i + 2))]);
+          }
+        } else {
+          for (let i = 0; i < position.count; i += 3) triangles.push([readVertex(i), readVertex(i + 1), readVertex(i + 2)]);
+        }
+      });
+      return triangles;
+    }
+
+    function triangleNormal(a, b, c) {
+      const THREE = window.THREE;
+      return new THREE.Vector3().subVectors(b, a).cross(new THREE.Vector3().subVectors(c, a)).normalize();
+    }
+
+    function packAndGo() {
+      const bundle = {
+        project: cleanState(),
+        exportedAt: new Date().toISOString(),
+        svg: sketchToSvg(),
+        dxf: sketchToDxf()
+      };
+      download(`${safeName(state.name)}-pack-and-go.json`, JSON.stringify(bundle, null, 2), "application/json");
+      notify("Project bundle created");
+    }
+
+    function defeature() {
+      snapshot();
+      state.features = state.features.filter(feature => ["extrude", "revolve", "sheetmetal", "weldment"].includes(feature.type));
+      state.entities = state.entities.filter(entity => !entity.name || !entity.name.includes("Hole"));
+      notify("Small features removed");
+      renderAll();
+    }
+
+    function rebuild() {
+      state.reports.push({ id: id("rp"), name: "Rebuild", value: `${state.entities.length + state.features.length} items rebuilt`, createdAt: new Date().toLocaleTimeString() });
+      notify("Model rebuilt");
+      renderAll();
+    }
+
+    function sketchToSvg() {
+      const bounds = overallBounds() || { x: -120, y: -80, w: 240, h: 160 };
+      const pad = 30;
+      const minX = bounds.x - pad;
+      const minY = bounds.y - pad;
+      const width = bounds.w + pad * 2;
+      const height = bounds.h + pad * 2;
+      const map = p => `${p.x - minX},${height - (p.y - minY)}`;
+      const elements = state.entities.map(entity => {
+        if (entity.type === "line" || entity.type === "centerline") return `<line x1="${entity.x1 - minX}" y1="${height - (entity.y1 - minY)}" x2="${entity.x2 - minX}" y2="${height - (entity.y2 - minY)}" stroke="#18212b" fill="none"/>`;
+        if (entity.type === "rect") return `<rect x="${Math.min(entity.x, entity.x + entity.w) - minX}" y="${height - (Math.max(entity.y, entity.y + entity.h) - minY)}" width="${Math.abs(entity.w)}" height="${Math.abs(entity.h)}" stroke="#18212b" fill="rgba(8,125,131,0.08)"/>`;
+        if (entity.type === "circle") return `<circle cx="${entity.x - minX}" cy="${height - (entity.y - minY)}" r="${Math.abs(entity.r)}" stroke="#18212b" fill="rgba(8,125,131,0.08)"/>`;
+        if (entity.type === "polygon") return `<polygon points="${polygonPoints(entity).map(map).join(" ")}" stroke="#18212b" fill="rgba(8,125,131,0.08)"/>`;
+        if (entity.type === "text") return `<text x="${entity.x - minX}" y="${height - (entity.y - minY)}" font-family="Segoe UI" font-size="${entity.size || 18}">${escapeHtml(entity.text)}</text>`;
+        return "";
+      }).join("");
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}">${elements}</svg>`;
+    }
+
+    function sketchToDxf() {
+      const lines = ["0", "SECTION", "2", "ENTITIES"];
+      state.entities.forEach(entity => {
+        if (entity.type === "line" || entity.type === "centerline") {
+          lines.push("0", "LINE", "8", "Sketch", "10", entity.x1, "20", entity.y1, "11", entity.x2, "21", entity.y2);
+        }
+        if (entity.type === "circle") {
+          lines.push("0", "CIRCLE", "8", "Sketch", "10", entity.x, "20", entity.y, "40", Math.abs(entity.r));
+        }
+        if (entity.type === "rect") {
+          const pts = [
+            { x: entity.x, y: entity.y },
+            { x: entity.x + entity.w, y: entity.y },
+            { x: entity.x + entity.w, y: entity.y + entity.h },
+            { x: entity.x, y: entity.y + entity.h }
+          ];
+          pts.forEach((p, i) => {
+            const q = pts[(i + 1) % pts.length];
+            lines.push("0", "LINE", "8", "Sketch", "10", p.x, "20", p.y, "11", q.x, "21", q.y);
+          });
+        }
+      });
+      lines.push("0", "ENDSEC", "0", "EOF");
+      return lines.join("\n");
+    }
+
+    function download(filename, content, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 500);
+    }
+
+    function zoomFit() {
+      if (isThreeWorkspace() && initThree()) {
+        fitThreeCamera(state.view);
+        render();
+        return;
+      }
+      const bounds = overallBounds();
+      const rect = canvasWrap.getBoundingClientRect();
+      if (!bounds) {
+        state.zoom = 1;
+        state.pan = { x: rect.width / 2, y: rect.height / 2 };
+      } else {
+        state.zoom = Math.max(0.2, Math.min(4, Math.min(rect.width / (bounds.w + 120), rect.height / (bounds.h + 120))));
+        state.pan = {
+          x: rect.width / 2 - (bounds.x + bounds.w / 2) * state.zoom,
+          y: rect.height / 2 + (bounds.y + bounds.h / 2) * state.zoom
+        };
+      }
+      render();
+    }
+
+    function changeZoom(factor) {
+      state.zoom = Math.max(0.2, Math.min(6, state.zoom * factor));
+      if (isThreeWorkspace() && initThree()) {
+        changeThreeZoom(factor);
+        zoomReadout.textContent = `${Math.round(state.zoom * 100)}%`;
+        return;
+      }
+      render();
+    }
+
+    function overallBounds() {
+      if (!state.entities.length) return null;
+      const bounds = state.entities.map(boundsOf);
+      const minX = Math.min(...bounds.map(b => b.x));
+      const minY = Math.min(...bounds.map(b => b.y));
+      const maxX = Math.max(...bounds.map(b => b.x + b.w));
+      const maxY = Math.max(...bounds.map(b => b.y + b.h));
+      return { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    }
+
+    function viewLabel() {
+      if (state.workspace === "drawing") return "Sheet";
+      if (state.workspace === "assembly") return "Assembly";
+      if (state.workspace === "evaluate") return "Analysis";
+      return state.view === "iso" ? "Isometric" : `${state.view[0].toUpperCase()}${state.view.slice(1)} View`;
+    }
+
+    function dist(a, b) {
+      return Math.hypot(a.x - b.x, a.y - b.y);
+    }
+
+    function pointToSegment(p, a, b) {
+      const l2 = (b.x - a.x) ** 2 + (b.y - a.y) ** 2;
+      if (!l2) return dist(p, a);
+      let t = ((p.x - a.x) * (b.x - a.x) + (p.y - a.y) * (b.y - a.y)) / l2;
+      t = Math.max(0, Math.min(1, t));
+      return dist(p, { x: a.x + t * (b.x - a.x), y: a.y + t * (b.y - a.y) });
+    }
+
+    function pointInPolygon(point, polygon) {
+      let inside = false;
+      for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+        const pi = polygon[i];
+        const pj = polygon[j];
+        const intersect = ((pi.y > point.y) !== (pj.y > point.y)) && (point.x < (pj.x - pi.x) * (point.y - pi.y) / (pj.y - pi.y) + pi.x);
+        if (intersect) inside = !inside;
+      }
+      return inside;
+    }
+
+    function polygonArea(points) {
+      return Math.abs(points.reduce((sum, point, index) => {
+        const next = points[(index + 1) % points.length];
+        return sum + point.x * next.y - next.x * point.y;
+      }, 0) / 2);
+    }
+
+    function polygonPerimeter(points) {
+      return points.reduce((sum, point, index) => sum + dist(point, points[(index + 1) % points.length]), 0);
+    }
+
+    function componentsOverlap(a, b) {
+      return Math.abs(a.x - b.x) < (a.w + b.w) / 2 && Math.abs(a.y - b.y) < (a.h + b.h) / 2;
+    }
+
+    function format(value) {
+      const number = Number(value || 0);
+      if (Math.abs(number) >= 1000) return number.toFixed(0);
+      if (Math.abs(number) >= 10) return number.toFixed(1);
+      return number.toFixed(2);
+    }
+
+    function safeName(name) {
+      return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "") || "cad-project";
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function notify(message) {
+      statusMessage.textContent = message;
+      toast.textContent = message;
+      toast.classList.add("show");
+      clearTimeout(transient.toastTimer);
+      transient.toastTimer = setTimeout(() => toast.classList.remove("show"), 1700);
+    }
+
+    commandTabs.addEventListener("click", event => {
+      const button = event.target.closest("[data-tab]");
+      if (button) setTab(button.dataset.tab);
+    });
+
+    commandStrip.addEventListener("click", event => {
+      const button = event.target.closest(".tool-btn");
+      if (!button) return;
+      if (button.dataset.tool) setTool(button.dataset.tool);
+      if (button.dataset.action) runCommand(button.dataset.action);
+    });
+
+    document.body.addEventListener("click", event => {
+      const actionButton = event.target.closest("[data-action]");
+      if (actionButton && !actionButton.classList.contains("tool-btn")) runCommand(actionButton.dataset.action);
+      const viewButton = event.target.closest("[data-view]");
+      if (viewButton) {
+        state.view = viewButton.dataset.view;
+        render();
+      }
+      const treeItem = event.target.closest("[data-tree-id]");
+      if (treeItem) {
+        const treeId = treeItem.dataset.treeId;
+        if (state.entities.some(entity => entity.id === treeId)) {
+          state.selected = [treeId];
+          state.selectedComponents = [];
+        }
+        if (state.components.some(component => component.id === treeId)) {
+          state.selectedComponents = [treeId];
+          state.selected = [];
+        }
+        renderAll();
+      }
+    });
+
+    extrudeDepthInput.addEventListener("input", updateExtrudePreview);
+    extrudeDepthInput.addEventListener("change", updateExtrudePreview);
+    extrudeConfirmBtn.addEventListener("click", confirmExtrude);
+    extrudeCancelBtn.addEventListener("click", closeExtrudeDialog);
+    extrudeOverlay.addEventListener("click", event => {
+      if (event.target === extrudeOverlay) closeExtrudeDialog();
+    });
+
+    propsBody.addEventListener("input", event => {
+      const liveProp = event.target.dataset.liveProp;
+      if (!liveProp) return;
+      state[liveProp] = Number(event.target.value);
+      propsBody.querySelectorAll(`[data-prop="${liveProp}"]`).forEach(input => {
+        if (input !== event.target) input.value = event.target.value;
+      });
+      render();
+    });
+
+    propsBody.addEventListener("change", event => {
+      const liveProp = event.target.dataset.liveProp;
+      if (liveProp) {
+        snapshot();
+        state[liveProp] = Number(event.target.value);
+        renderAll();
+        return;
+      }
+      const prop = event.target.dataset.prop;
+      if (prop) {
+        snapshot();
+        if (prop === "snap") state.snap = event.target.value === "true";
+        else if (prop === "unit") state.unit = event.target.value;
+        else state[prop] = Number(event.target.value);
+        renderAll();
+      }
+      const selectedProp = event.target.dataset.selectedProp;
+      if (selectedProp && state.selected.length) {
+        snapshot();
+        const entity = state.entities.find(item => item.id === state.selected[0]);
+        if (entity) entity[selectedProp] = event.target.type === "number" ? Number(event.target.value) : event.target.value;
+        renderAll();
+      }
+    });
+
+    canvas.addEventListener("pointerdown", pointerDown);
+    canvas.addEventListener("pointermove", pointerMove);
+    canvas.addEventListener("pointerup", pointerUp);
+    canvas.addEventListener("pointerleave", pointerUp);
+    canvas.addEventListener("dblclick", pointerDoubleClick);
+    canvas.addEventListener("wheel", event => {
+      if (isThreeWorkspace() && initThree()) {
+        state.zoom = Math.max(0.2, Math.min(6, state.zoom * (event.deltaY > 0 ? 0.92 : 1.08)));
+        zoomReadout.textContent = `${Math.round(state.zoom * 100)}%`;
+        return;
+      }
+      event.preventDefault();
+      changeZoom(event.deltaY > 0 ? 0.92 : 1.08);
+    }, { passive: false });
+
+    fileInput.addEventListener("change", event => {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        restore(reader.result);
+        savedState.textContent = `Opened ${file.name}`;
+        notify("Project opened");
+      };
+      reader.readAsText(file);
+      fileInput.value = "";
+    });
+
+    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener("keydown", event => {
+      if (event.ctrlKey && event.key.toLowerCase() === "z") {
+        event.preventDefault();
+        undo();
+      }
+      if (event.ctrlKey && event.key.toLowerCase() === "y") {
+        event.preventDefault();
+        redo();
+      }
+      if (event.key === "Escape") {
+        if (extrudeOverlay.classList.contains("open")) {
+          closeExtrudeDialog();
+          return;
+        }
+        setTool("select");
+      }
+      if (event.key === "Enter" && state.tool === "spline" && transient.splinePoints.length > 1) {
+        addEntity({ type: "spline", points: transient.splinePoints.slice() });
+        transient.splinePoints = [];
+        transient.drawing = false;
+      }
+    });
+
+    renderAll();
+    resizeCanvas();
+    loadLocal();
+  </script>
+</body>
+</html>
